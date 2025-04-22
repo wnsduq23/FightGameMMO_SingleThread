@@ -65,7 +65,7 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 ---
 
 ## 폴더 구조
-```plaintext 📦FightGameMMO ┣ 📂Core # 핵심 유틸리티 및 공통 기능 ┃ ┣ 📜RingBuffer.h ┃ ┣ 📜SerializePacket.h ┃ ┣ 📜pch.h ┃ ┗ 📜main.cpp ┣ 📂Log # 로깅 및 디버깅 ┃ ┣ 📜SystemLog.cpp ┃ ┗ 📜CrashDump.cpp ┣ 📂Profiler # 성능 분석 관련 모듈 ┃ ┗ 📜Profiler.cpp ┣ 📂Network # 네트워크 및 세션 처리 ┃ ┣ 📜NetworkManager.cpp ┃ ┣ 📜Session.cpp ┃ ┣ 📜Protocol.h ┃ ┗ 📜SetSCPacket.cpp ┣ 📂ObjectPool # 오브젝트 재사용/풀링 시스템 ┃ ┗ 📜ObjectPoolManager.cpp ┣ 📂Game # 게임 콘텐츠 및 로직 ┃ ┣ 📜IngameManager.cpp ┃ ┣ 📜Player.cpp ┃ ┗ 📜Sector.cpp ```
+
 <pre>
 📦FightGameMMO 
 ┣ 📂Core # 핵심 유틸리티 및 공통 기능
