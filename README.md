@@ -67,6 +67,8 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 ![test log](images/TestLog.png)
 
 ### 주요 함수 호출 성능 테스트
+- 서버 성능 분석을 위한 주요 함수 단위 프로파일링 결과입니다.
+IO 처리, 콘텐츠 갱신, 세션 관리 등 핵심 로직의 평균 처리 시간을 측정했습니다.
 ![output](images/output.png)
 ---
 
