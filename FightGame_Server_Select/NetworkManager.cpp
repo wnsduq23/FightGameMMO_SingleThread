@@ -248,7 +248,7 @@ void NetworkManager::SendProc(Session* session)
 	PRO_BEGIN(L"Network: Send");
 
 	
-	if (session->_sendRingBuf.GetUseSize() <= 25)
+	if (session->_sendRingBuf.GetUseSize() <= 12)
 		return;
 
 	int sendRet = 0;
