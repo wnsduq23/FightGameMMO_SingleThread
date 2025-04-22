@@ -1,0 +1,4 @@
+[FightGame][2025-04-22 17:01:19/level:2/count:00000000] Main Thread Start
+[FightGame][2025-04-22 17:01:19/level:1/count:00000001] NetworkManager::NetworkManager[64]: bind Error, 10048
+[FightGame][2025-04-22 17:01:30/level:2/count:00000000] Main Thread Start
+[FightGame][2025-04-22 17:01:41/level:0/count:00000001] NetworkManager::RecvProc[491]: recv returns 0

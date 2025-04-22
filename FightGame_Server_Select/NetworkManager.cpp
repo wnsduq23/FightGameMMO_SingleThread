@@ -247,6 +247,7 @@ void NetworkManager::SendProc(Session* session)
 {
 	PRO_BEGIN(L"Network: Send");
 
+	
 	if (session->_sendRingBuf.GetUseSize() <= 25)
 		return;
 
@@ -738,7 +739,6 @@ bool NetworkManager::HandleCSPacket_MoveStart(Player* pPlayer)
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
 		PRO_SAVE(L"output.txt");
-		g_dump.Crash();
 	}
 
 	pPlayer->SetPlayerMoveStart(moveDirection, X, Y);
@@ -795,12 +795,11 @@ bool NetworkManager::HandleCSPacket_MoveStop(Player* pPlayer)
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
 		PRO_SAVE(L"output.txt");
-		g_dump.Crash();
 	}
 
 	pPlayer->SetPlayerMoveStop(headDirection, X, Y);
 
-	IngameManager::GetInstance().UpdateSector(pPlayer); // 이걸 넣어야하나?
+	IngameManager::GetInstance().UpdateSector(pPlayer);
 
 	pPlayer->GetSession()->_sendSerialPacket.Clear();
 	int setRet = SetSCPacket_MOVE_STOP(&pPlayer->GetSession()->_sendSerialPacket, 
@@ -853,7 +852,6 @@ bool NetworkManager::HandleCSPacket_Attack1(Player* pPlayer)
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
 		PRO_SAVE(L"output.txt");
-		g_dump.Crash();
 	}
 
 	Player* damagedPlayer = nullptr;
@@ -918,7 +916,6 @@ bool NetworkManager::HandleCSPacket_Attack2(Player* pPlayer)
 		Y = pPlayer->GetY();
 
 		PRO_SAVE(L"output.txt");
-		g_dump.Crash();
 	}
 
 	Player* damagedPlayer = nullptr;
@@ -984,7 +981,6 @@ bool NetworkManager::HandleCSPacket_Attack3(Player* pPlayer)
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
 		PRO_SAVE(L"output.txt");
-		g_dump.Crash();
 	}
 
 	Player* damagedPlayer = nullptr;
@@ -1042,7 +1038,6 @@ bool NetworkManager::HandleCSPacket_ECHO(Player* pPlayer)
 	
 	return true;
 }
-
 
 //serialize Buffer로 바뀌면서 msg로 header + msg가 들어옴.
 void NetworkManager::SendPacketUnicast(char* msg, int size, Session* session)

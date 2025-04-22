@@ -3,6 +3,7 @@
 #include "main.h"
 #include <tchar.h>
 
+// 3 bytes
 void SetSCPacket_HEADER(
 	stPACKET_HEADER& header,
 	BYTE Size, BYTE Type)
@@ -12,6 +13,7 @@ void SetSCPacket_HEADER(
 	header.action_type = Type;
 }
 
+// 13 bytes
 int SetSCPacket_CREATE_MY_CHARACTER(
 	SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y, char HP) // headDirection
@@ -44,6 +46,7 @@ int SetSCPacket_CREATE_MY_CHARACTER(
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
+// 13 bytes
 int SetSCPacket_CREATE_OTHER_CHARACTER(
 	SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y, char HP) // headDirection
@@ -76,6 +79,7 @@ int SetSCPacket_CREATE_OTHER_CHARACTER(
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
+// 7 bytes
 int SetSCPacket_DELETE_CHARACTER(
 	SerializePacket* pPacket,
 	DWORD ID)
@@ -104,6 +108,7 @@ int SetSCPacket_DELETE_CHARACTER(
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
+// 12 bytes
 int SetSCPacket_MOVE_START(SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y)
 {
@@ -134,7 +139,7 @@ int SetSCPacket_MOVE_START(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
-
+// 12 bytes
 int SetSCPacket_MOVE_STOP(SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y)
 {
@@ -165,6 +170,7 @@ int SetSCPacket_MOVE_STOP(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
+// 12 bytes
 int SetSCPacket_ATTACK1(SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y)
 {
@@ -195,6 +201,7 @@ int SetSCPacket_ATTACK1(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
+// 12 bytes
 int SetSCPacket_ATTACK2(SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y)
 {
@@ -225,7 +232,7 @@ int SetSCPacket_ATTACK2(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
-
+// 12 bytes
 int SetSCPacket_ATTACK3(SerializePacket* pPacket,
 	DWORD ID, BYTE Direction, short X, short Y)
 {
@@ -256,8 +263,7 @@ int SetSCPacket_ATTACK3(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
-
-
+// 12 bytes
 int SetSCPacket_DAMAGE(SerializePacket* pPacket,
 	DWORD AttackID, DWORD DamageID, char DamageHP)
 {
@@ -287,7 +293,7 @@ int SetSCPacket_DAMAGE(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
-
+// 11 bytes
 int SetSCPacket_SYNC(SerializePacket* pPacket,
 	DWORD ID, short X, short Y)
 {
@@ -318,6 +324,7 @@ int SetSCPacket_SYNC(SerializePacket* pPacket,
 	return (size + dfPACKET_HEADER_SIZE);
 }
 
+// 7 bytes
 int SetSCPacket_ECHO(SerializePacket* pPacket, int time)
 {
 	int size = sizeof(time);
