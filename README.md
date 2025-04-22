@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/4ac1623d-e092-45e6-9bdf-a6eab0ec06ed)# FightGameMMO
+# FightGameMMO
 
 ## 📌 목차
 - [개요](#개요)
