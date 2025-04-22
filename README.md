@@ -42,7 +42,7 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 - 공격 히트 시 **이펙트 발생**
 ![effect](images/effect.png)
 - 캐릭터 사망 시 **자동 접속 종료**
-
+![end](images/End.png)
 ---
 
 ## 테스트
