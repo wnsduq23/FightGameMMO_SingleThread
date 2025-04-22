@@ -38,11 +38,15 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 | 발차기        | C      |        |
 
 - 본인 캐릭터는 **빨간색**으로 표시됩니다 (타 유저 시점에서는 X).
+
 ![red](images/RedCharacter.png)
 - 공격 히트 시 **이펙트 발생**
+
 ![effect](images/effect.png)
 - 캐릭터 사망 시 **자동 접속 종료**
+
 ![end](images/End.png)
+
 ---
 
 ## 테스트
