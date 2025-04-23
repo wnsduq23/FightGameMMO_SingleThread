@@ -62,7 +62,7 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 #### 체크리스트
 - [x] Connect Error 발생 여부 확인
 - [x] Sync Message 이상 여부 확인
-- [x] Disconnect from Server 체크
+- [x] Disconnect from Server 체크(hp가 남아 있는 데 끊어지는 지 확인)
 - [x] Contents Error 발생 여부 확인
 - [x] Packet Message Error 발생 여부 확인
 - [x] 30초 이상 무입력 시 강제 접속 종료
