@@ -60,12 +60,12 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 - 다양한 상황에서 발생 가능한 오류 및 상태 체크 수행
 
 #### 체크리스트
-- [x] Connect Error 발생 여부 확인
-- [x] Sync Message 이상 여부 확인
+- [x] Connect Error 발생 여부 확인(클라쪽으로 rst 패킷이 오는 경우 확인)
+- [x] Sync Message 이상 여부 확인(좌표 틀어짐이 허용범위 이상인 지 확인)
 - [x] Disconnect from Server 체크(hp가 남아 있는 데 끊어지는 지 확인)
 - [x] Contents Error 발생 여부 확인
-- [x] Packet Message Error 발생 여부 확인
-- [x] 30초 이상 무입력 시 강제 접속 종료
+- [x] Packet Message Error 발생 여부 확인(헤더 및 데이터 올바른 지 확인)
+- [x] 30초 이상 무입력 시 강제 접속 종료 여부 확인
 - [x] 세션 개수와 캐릭터 수 일치 여부 확인
 
 ![test log](images/TestLog.png)
