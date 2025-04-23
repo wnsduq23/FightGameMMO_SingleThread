@@ -46,6 +46,8 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 - 캐릭터 사망 시 **자동 접속 종료**
 
 ![end](images/End.png)
+- Sector 변경
+![Image](https://github.com/user-attachments/assets/b006dbd4-05d3-4e71-a8dc-8f76aaace2da)
 
 ---
 
