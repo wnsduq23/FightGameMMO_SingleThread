@@ -45,7 +45,7 @@ NetworkManager::NetworkManager()
 		return;
 	}
 	int flag = 1;
-	setsockopt(_listensock, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
+	//setsockopt(_listensock, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 
 	// Bind
 	SOCKADDR_IN serveraddr;
@@ -132,9 +132,9 @@ NetworkManager::~NetworkManager()
 void NetworkManager::NetworkUpdate()
 {
     // 3) select로 처리된 결과 중, 종료될 세션이 있다면 여기서 정리
-    PRO_BEGIN(L"Delayed Disconnect");
+    PRO_BEGIN(L"Disconnect");
     DisconnectDeadSessions();
-    PRO_END(L"Delayed Disconnect");
+    PRO_END(L"Disconnect");
 
     PRO_BEGIN(L"Network");
 
@@ -243,17 +243,30 @@ void NetworkManager::SelectModel(int rStartIdx, int rCount, int wStartIdx, int w
 	}
 }
 
+#include <string>
 void NetworkManager::SendProc(Session* session)
 {
 	PRO_BEGIN(L"Network: Send");
 
 	
-	if (session->_sendRingBuf.GetUseSize() <= 12)
-		return;
+	int useSize = session->_sendRingBuf.GetUseSize();
+    // 1) 최소 헤더 크기만큼도 안 들어왔으면 아무 것도 못 보냄
+    if (useSize < dfPACKET_HEADER_SIZE)
+        return;
+
+    // 2) 링버퍼에서 헤더만 Peek 해서 payload 길이를 파악
+    stPACKET_HEADER hdr;
+    session->_sendRingBuf.Peek((char*)&hdr, dfPACKET_HEADER_SIZE);
+
+    int packetSize = dfPACKET_HEADER_SIZE + hdr.payload_size;
+    // 3) 패킷 전체가 아직 다 안 들어왔으면 보낼 수 없음
+    if (useSize < packetSize)
+        return;
 
 	int sendRet = 0;
 	int directDeqSize;
 	int moveRet;
+
 	directDeqSize = session->_sendRingBuf.DirectDequeueSize();
 	if (directDeqSize != session->_sendRingBuf.GetUseSize())
 	{
@@ -343,6 +356,7 @@ void NetworkManager::SendProc(Session* session)
 		g_dump.Crash();
 		return;
 	}
+	printf("1\n");
 }
 
 void NetworkManager::AcceptProc()
@@ -366,7 +380,9 @@ void NetworkManager::AcceptProc()
 	else
 		ID = _usableSessionID[--_usableCnt];
 
+	PRO_BEGIN(L"ObjectPool Alloc");
 	Session* pSession = _pSessionPool->Alloc();
+	PRO_END(L"ObjectPool Alloc");
 	pSession->Initialize(ID);
 	if (pSession == nullptr)
 	{
@@ -662,7 +678,6 @@ void NetworkManager::DisconnectDeadSessions()
 
 bool NetworkManager::HandleCSPackets(Player* pPlayer, BYTE type)
 {
-	//printf("Player : %d (%d,%d), Session : %d, action_type : %d\n", pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY(),pPlayer->GetSession()->_ID, type);
 	switch (type)
 	{
 	case dfPACKET_CS_MOVE_START:

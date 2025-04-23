@@ -71,6 +71,8 @@ void IngameManager::GameContentsModule()
         return;
     }
 	PRO_END(L"Content");
+
+	PRO_SAVE(L"output.txt");
 }
 
 /*===================================================================
@@ -534,7 +536,9 @@ void IngameManager::PlayerActionProc()
 
 void IngameManager::CreatePlayer(Session* pSession)
 {
+	PRO_BEGIN(L"ObjectPool Alloc");
 	Player* pPlayer = _pPlayerPool->Alloc(pSession, _playerID++);
+	PRO_END(L"ObjectPool Alloc");
 	_Players[pSession->_ID] = pPlayer;
 	SetPlayerSector(pPlayer);
 	

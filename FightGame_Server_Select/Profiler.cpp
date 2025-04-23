@@ -142,58 +142,71 @@ void ProfileEnd(const WCHAR* name)
 void ProfilePrintResult()
 {
 	::wprintf(
-		L"----------------------------------------------\n"
-		"| Name | Average | Call/s | Total |\n"
-		"----------------------------------------------\n");
+		L"-------------------------------------------------------------------------------\n"
+		L"| %-20s | %12s | %10s | %14s |\n"
+		L"-------------------------------------------------------------------------------\n",
+		L"Name", L"Average", L"Call/s", L"Total");
 
 	int idx = 0;
 	while (PROFILE_RESULT[idx]._flag != 0)
 	{
 		_PROFILE_RESULT& pf = PROFILE_RESULT[idx];
+		double avgMs = (pf._totalTime / pf._call) * MS_PER_SEC;
+		double totMs = avgMs * pf._call;
+
 		::wprintf(
-			L"| %ls | %.4lfms | %lld | %.2lfms |\n",
+			L"| %-20ls | %12.4lf | %10lld | %14.2lf |\n",
 			pf._name,
-			(pf._totalTime / pf._call) * MS_PER_SEC,
+			avgMs,
 			pf._call,
-			(pf._totalTime / pf._call) * MS_PER_SEC * pf._call);
+			totMs
+		);
 		idx++;
 	}
 
-	::wprintf(L"----------------------------------------------\n\n");
+	::wprintf(
+		L"-------------------------------------------------------------------------------\n\n"
+	);
 }
 
 void ProfileSaveResult(const WCHAR* filename)
 {
 	char data[OUTPUT_SIZE] =
-		"----------------------------------------------\n"
-		"| Name | Average | Call/s | Total |\n"
-		"----------------------------------------------\n";
+		"-------------------------------------------------------------------------------\n"
+		"| Name                      |      Average |     Call/s |          Total |\n"
+		"-------------------------------------------------------------------------------\n";
 
 	int idx = 0;
 	char buffer[BUFFER_SIZE];
 	while (PROFILE_RESULT[idx]._flag != 0)
 	{
 		_PROFILE_RESULT& pf = PROFILE_RESULT[idx];
-		memset(buffer, '\0', BUFFER_SIZE);
+		double avgMs = (pf._totalTime / pf._call) * MS_PER_SEC;
+		double totMs = avgMs * pf._call;
+
 		sprintf_s(buffer, BUFFER_SIZE,
-			"| %ls | %.4lfms | %lld | %.2lfms |\n",
-			pf._name,
-			(pf._totalTime / pf._call) * MS_PER_SEC,
+			"| %-25S | %12.4lf | %10lld | %14.2lf |\n",
+			PROFILE_RESULT[idx]._name,
+			avgMs,
 			pf._call,
-			(pf._totalTime / pf._call) * MS_PER_SEC * pf._call);
+			totMs
+		);
 
 		strcat_s(data, OUTPUT_SIZE, buffer);
 		idx++;
 	}
 
 	strcat_s(data, OUTPUT_SIZE,
-		"----------------------------------------------\n\n");
+		"-------------------------------------------------------------------------------\n\n"
+	);
 
 	FILE* file;
-	errno_t ret;
-	ret = _wfopen_s(&file, filename, L"wb");
+	errno_t ret = _wfopen_s(&file, filename, L"wb");
 	if (ret != 0)
+	{
 		::wprintf(L"Fail to open %s : %d\n", filename, ret);
+		return;
+	}
 	fwrite(data, strlen(data), 1, file);
 	fclose(file);
 }

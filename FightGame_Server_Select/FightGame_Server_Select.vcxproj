@@ -135,7 +135,7 @@
     <ClCompile Include="Profiler.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="SetSCPacket.cpp" />
-    <ClCompile Include="Ingame.cpp" />
+    <ClCompile Include="IngameManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetworkManager.cpp" />
     <ClCompile Include="ObjectPoolManager.cpp" />
