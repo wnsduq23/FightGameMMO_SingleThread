@@ -356,7 +356,6 @@ void NetworkManager::SendProc(Session* session)
 		g_dump.Crash();
 		return;
 	}
-	printf("1\n");
 }
 
 void NetworkManager::AcceptProc()
