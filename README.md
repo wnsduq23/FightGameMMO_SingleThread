@@ -48,7 +48,7 @@ FightGameMMO는 단일 스레드 기반의 **실시간 멀티 유저 전투 게�
 ![end](images/End.png)
 - Sector 변경
 
-()
+![Image](https://github.com/user-attachments/assets/f0670cc1-e5f6-44be-9078-b7ec0daa7345)
 
 ---
 
