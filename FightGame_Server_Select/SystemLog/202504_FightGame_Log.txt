@@ -3186,3 +3186,4 @@
 [FightGame][2025-04-23 17:45:39/level:0/count:00003125] RingBuffer::Resize[255] Resize
 [FightGame][2025-04-23 17:59:49/level:2/count:00000000] Main Thread Start
 [FightGame][2025-04-23 18:00:33/level:2/count:00000000] Main Thread Start
+[FightGame][2025-04-23 18:03:51/level:2/count:00000000] Main Thread Start

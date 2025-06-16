@@ -155,9 +155,10 @@ void ProfilePrintResult()
 		double totMs = avgMs * pf._call;
 
 		::wprintf(
-			L"| %-20ls | %12.4lf | %10lld | %14.2lf |\n",
+			L"| %-20ls | %12.4lf | %8lf |%10lld | %14.2lf |\n",
 			pf._name,
 			avgMs,
+			pf._call / pf._totalTime,
 			pf._call,
 			totMs
 		);
@@ -173,7 +174,7 @@ void ProfileSaveResult(const WCHAR* filename)
 {
 	char data[OUTPUT_SIZE] =
 		"-------------------------------------------------------------------------------\n"
-		"| Name                      |      Average |     Call/s |          Total |\n"
+		"| Name                      |      Average |    Call/s|Total Call	|     Total		|\n"
 		"-------------------------------------------------------------------------------\n";
 
 	int idx = 0;
@@ -185,9 +186,10 @@ void ProfileSaveResult(const WCHAR* filename)
 		double totMs = avgMs * pf._call;
 
 		sprintf_s(buffer, BUFFER_SIZE,
-			"| %-25S | %12.4lf | %10lld | %14.2lf |\n",
+			"| %-25S | %12.4lf | %8.lf | %10lld | %14.2lf |\n",
 			PROFILE_RESULT[idx]._name,
 			avgMs,
+			pf._call / pf._totalTime,
 			pf._call,
 			totMs
 		);
