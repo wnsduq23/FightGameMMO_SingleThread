@@ -45,7 +45,7 @@ NetworkManager::NetworkManager()
 		return;
 	}
 	int flag = 1;
-	//setsockopt(_listensock, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
+	setsockopt(_listensock, IPPROTO_TCP, TCP_NODELAY, (char*)&flag, sizeof(flag));
 
 	// Bind
 	SOCKADDR_IN serveraddr;
@@ -244,24 +244,37 @@ void NetworkManager::SelectModel(int rStartIdx, int rCount, int wStartIdx, int w
 }
 
 #include <string>
+
+
+bool IsDelayablePacket(BYTE type)
+{
+    return (
+        type == dfPACKET_SC_MOVE_START
+    );
+}
 void NetworkManager::SendProc(Session* session)
 {
 	PRO_BEGIN(L"Network: Send");
 
-	
+	static bool delayedMoveStart = true;
+
 	int useSize = session->_sendRingBuf.GetUseSize();
-    // 1) 최소 헤더 크기만큼도 안 들어왔으면 아무 것도 못 보냄
-    if (useSize < dfPACKET_HEADER_SIZE)
-        return;
+	if (useSize < sizeof(stPACKET_HEADER)) return;
 
-    // 2) 링버퍼에서 헤더만 Peek 해서 payload 길이를 파악
-    stPACKET_HEADER hdr;
-    session->_sendRingBuf.Peek((char*)&hdr, dfPACKET_HEADER_SIZE);
+	stPACKET_HEADER hdr;
+	session->_sendRingBuf.Peek((char*)&hdr, sizeof(hdr));
 
-    int packetSize = dfPACKET_HEADER_SIZE + hdr.payload_size;
-    // 3) 패킷 전체가 아직 다 안 들어왔으면 보낼 수 없음
-    if (useSize < packetSize)
-        return;
+	int packetSize = sizeof(hdr) + hdr.payload_size;
+	if (useSize < packetSize) return;
+
+	if (useSize == packetSize && IsDelayablePacket(hdr.action_type))
+	{
+		if (!delayedMoveStart) 
+		{
+			delayedMoveStart = true;
+			return;
+		}
+	}
 
 	int sendRet = 0;
 	int directDeqSize;
@@ -356,6 +369,8 @@ void NetworkManager::SendProc(Session* session)
 		g_dump.Crash();
 		return;
 	}
+
+	delayedMoveStart = false;
 }
 
 void NetworkManager::AcceptProc()

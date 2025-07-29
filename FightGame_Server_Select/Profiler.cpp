@@ -38,7 +38,6 @@ void ProfileBegin(const WCHAR* name)
 			QueryPerformanceCounter(&pf._startTime);
 			return;
 		}
-
 		else if (PROFILE_RESULT[i]._flag == 0)
 		{
 			_PROFILE_RESULT& pf = PROFILE_RESULT[i];
@@ -142,73 +141,60 @@ void ProfileEnd(const WCHAR* name)
 void ProfilePrintResult()
 {
 	::wprintf(
-		L"-------------------------------------------------------------------------------\n"
-		L"| %-20s | %12s | %10s | %14s |\n"
-		L"-------------------------------------------------------------------------------\n",
-		L"Name", L"Average", L"Call/s", L"Total");
+		L"----------------------------------------------\n"
+		"| Name | Average(us) | Call/s | Total call | Total(us) |\n"
+		"----------------------------------------------\n");
 
 	int idx = 0;
 	while (PROFILE_RESULT[idx]._flag != 0)
 	{
 		_PROFILE_RESULT& pf = PROFILE_RESULT[idx];
-		double avgMs = (pf._totalTime / pf._call) * MS_PER_SEC;
-		double totMs = avgMs * pf._call;
-
 		::wprintf(
-			L"| %-20ls | %12.4lf | %8lf |%10lld | %14.2lf |\n",
+			L"| %ls | %.4lfms | %8.lf \t| %10lld \t| %.2lfms |\n",
 			pf._name,
-			avgMs,
+			(pf._totalTime / pf._call) * MS_PER_SEC,
 			pf._call / pf._totalTime,
 			pf._call,
-			totMs
-		);
+			(pf._totalTime / pf._call) * MS_PER_SEC * pf._call);
 		idx++;
 	}
 
-	::wprintf(
-		L"-------------------------------------------------------------------------------\n\n"
-	);
+	::wprintf(L"----------------------------------------------\n\n");
 }
 
 void ProfileSaveResult(const WCHAR* filename)
 {
 	char data[OUTPUT_SIZE] =
-		"-------------------------------------------------------------------------------\n"
-		"| Name                      |      Average |    Call/s|Total Call	|     Total		|\n"
-		"-------------------------------------------------------------------------------\n";
+		"----------------------------------------------\n"
+		"| Name \t\t| Average(us) \t| Call/s \t| Total Call | Total(us) |\n"
+		"----------------------------------------------\n";
 
 	int idx = 0;
 	char buffer[BUFFER_SIZE];
 	while (PROFILE_RESULT[idx]._flag != 0)
 	{
 		_PROFILE_RESULT& pf = PROFILE_RESULT[idx];
-		double avgMs = (pf._totalTime / pf._call) * MS_PER_SEC;
-		double totMs = avgMs * pf._call;
-
+		memset(buffer, '\0', BUFFER_SIZE);
 		sprintf_s(buffer, BUFFER_SIZE,
-			"| %-25S | %12.4lf | %8.lf | %10lld | %14.2lf |\n",
-			PROFILE_RESULT[idx]._name,
-			avgMs,
+			"| %ls \t| %.4lfms \t| %8.lf \t| %10lld \t| %.2lfms |\n",
+			pf._name,
+			(pf._totalTime / pf._call) * MS_PER_SEC,
 			pf._call / pf._totalTime,
 			pf._call,
-			totMs
-		);
+			(pf._totalTime / pf._call) * MS_PER_SEC * pf._call);
 
 		strcat_s(data, OUTPUT_SIZE, buffer);
 		idx++;
 	}
 
 	strcat_s(data, OUTPUT_SIZE,
-		"-------------------------------------------------------------------------------\n\n"
-	);
+		"----------------------------------------------\n\n");
 
 	FILE* file;
-	errno_t ret = _wfopen_s(&file, filename, L"wb");
+	errno_t ret;
+	ret = _wfopen_s(&file, filename, L"wb");
 	if (ret != 0)
-	{
 		::wprintf(L"Fail to open %s : %d\n", filename, ret);
-		return;
-	}
 	fwrite(data, strlen(data), 1, file);
 	fclose(file);
 }
