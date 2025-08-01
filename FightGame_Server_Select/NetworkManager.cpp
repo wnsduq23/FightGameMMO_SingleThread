@@ -118,7 +118,7 @@ NetworkManager::~NetworkManager()
 	{
 		if (_Sessions[i] != nullptr)
 		{
-			closesocket(_Sessions[i]->_socket);
+			closesocket(_Sessions[i]->GetSocket());
 			_pSessionPool->Free(_Sessions[i]);
 		}
 	}
@@ -145,14 +145,14 @@ void NetworkManager::NetworkUpdate()
     for (int i = 0; i < dfSESSION_MAX; i++)
     {
         // 세션이 살아있는 상태인지 확인
-        if (_Sessions[i] == nullptr || !_Sessions[i]->_bAlive)
+        if (_Sessions[i] == nullptr || !_Sessions[i]->GetSessionAlive())
             continue;
 
         // 읽기 대상
         _rSessions[rCount++] = _Sessions[i];
 
         // 쓰기 버퍼에 보낼 데이터가 있으면 쓰기 대상
-        if (_Sessions[i]->_sendRingBuf.GetUseSize() > 0)
+        if (_Sessions[i]->GetSendRingBuf().GetUseSize() > 0)
             _wSessions[wCount++] = _Sessions[i];
     }
 
@@ -206,9 +206,9 @@ void NetworkManager::SelectModel(int rStartIdx, int rCount, int wStartIdx, int w
 
 	FD_SET(_listensock, &_rset);
 	for (int i = 0; i < wCount; i++)
-		FD_SET(_wSessions[wStartIdx + i]->_socket, &_wset);
+		FD_SET(_wSessions[wStartIdx + i]->GetSocket(), &_wset);
 	for (int i = 0; i < rCount; i++)
-		FD_SET(_rSessions[rStartIdx + i]->_socket, &_rset);
+		FD_SET(_rSessions[rStartIdx + i]->GetSocket(), &_rset);
 
 	// Select Socket Set
 	int selectRet = select(0, &_rset, &_wset, NULL, &_time);
@@ -233,11 +233,11 @@ void NetworkManager::SelectModel(int rStartIdx, int rCount, int wStartIdx, int w
 			AcceptProc();
 
 		for (int i = 0; i < rCount; i++)
-			if (FD_ISSET(_rSessions[rStartIdx + i]->_socket, &_rset))
+			if (FD_ISSET(_rSessions[rStartIdx + i]->GetSocket(), &_rset))
 				RecvProc(_rSessions[rStartIdx + i]);
 
 		for (int i = 0; i < wCount; i++)
-			if (FD_ISSET(_wSessions[wStartIdx + i]->_socket, &_wset) && _wSessions[wStartIdx + i]->_bAlive)
+			if (FD_ISSET(_wSessions[wStartIdx + i]->GetSocket(), &_wset) && _wSessions[wStartIdx + i]->GetSessionAlive())
 				SendProc(_wSessions[wStartIdx + i]);
 
 	}
@@ -258,11 +258,11 @@ void NetworkManager::SendProc(Session* session)
 
 	static bool delayedMoveStart = true;
 
-	int useSize = session->_sendRingBuf.GetUseSize();
+	int useSize = session->GetSendRingBuf().GetUseSize();
 	if (useSize < sizeof(stPACKET_HEADER)) return;
 
 	stPACKET_HEADER hdr;
-	session->_sendRingBuf.Peek((char*)&hdr, sizeof(hdr));
+	session->GetSendRingBuf().Peek((char*)&hdr, sizeof(hdr));
 
 	int packetSize = sizeof(hdr) + hdr.payload_size;
 	if (useSize < packetSize) return;
@@ -280,11 +280,11 @@ void NetworkManager::SendProc(Session* session)
 	int directDeqSize;
 	int moveRet;
 
-	directDeqSize = session->_sendRingBuf.DirectDequeueSize();
-	if (directDeqSize != session->_sendRingBuf.GetUseSize())
+	directDeqSize = session->GetSendRingBuf().DirectDequeueSize();
+	if (directDeqSize != session->GetSendRingBuf().GetUseSize())
 	{
-		sendRet = send(session->_socket,
-			session->_sendRingBuf.GetReadPtr(),
+		sendRet = send(session->GetSocket(),
+			session->GetSendRingBuf().GetReadPtr(),
 			directDeqSize, 0);
 
 		if (sendRet == SOCKET_ERROR)
@@ -299,36 +299,36 @@ void NetworkManager::SendProc(Session* session)
 			{
 				LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 					L"%s[%d]: Session %d Send Error, %d\n",
-					_T(__FUNCTION__), __LINE__, session->_ID, err);
+					_T(__FUNCTION__), __LINE__, session->GetID(), err);
 
 				::wprintf(L"%s[%d]: Session %d Send Error, %d\n",
-					_T(__FUNCTION__), __LINE__, session->_ID, err);
+					_T(__FUNCTION__), __LINE__, session->GetID(), err);
 
 				session->SetSessionDead();
 				return;
 			}
 		}
-		moveRet = session->_sendRingBuf.MoveReadPos(sendRet);
+		moveRet = session->GetSendRingBuf().MoveReadPos(sendRet);
 		if (sendRet != moveRet)
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d] Session %d - sendRBuf moveReadPos Error (req - %d, ret - %d)\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, sendRet, moveRet);
+				_T(__FUNCTION__), __LINE__, session->GetID(), sendRet, moveRet);
 
 			::wprintf(L"%s[%d] Session %d - sendRBuf moveReadPos Error (req - %d, ret - %d)\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, sendRet, moveRet);
+				_T(__FUNCTION__), __LINE__, session->GetID(), sendRet, moveRet);
 
 			g_dump.Crash();
 			return;
 		}
-		sendRet = send(session->_socket,
-			session->_sendRingBuf.GetReadPtr(),
-			session->_sendRingBuf.GetUseSize(), 0);
+		sendRet = send(session->GetSocket(),
+			session->GetSendRingBuf().GetReadPtr(),
+			session->GetSendRingBuf().GetUseSize(), 0);
 	}
 	else
 	{
-		sendRet = send(session->_socket,
-			session->_sendRingBuf.GetReadPtr(),
+		sendRet = send(session->GetSocket(),
+			session->GetSendRingBuf().GetReadPtr(),
 			directDeqSize, 0);
 	}
 	PRO_END(L"Network: Send");
@@ -346,25 +346,25 @@ void NetworkManager::SendProc(Session* session)
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d]: Session %d Send Error, %d\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, err);
+				_T(__FUNCTION__), __LINE__, session->GetID(), err);
 
 			::wprintf(L"%s[%d]: Session %d Send Error, %d\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, err);
+				_T(__FUNCTION__), __LINE__, session->GetID(), err);
 
 			session->SetSessionDead();
 			return;
 		}
 	}
 
-	moveRet = session->_sendRingBuf.MoveReadPos(sendRet);
+	moveRet = session->GetSendRingBuf().MoveReadPos(sendRet);
 	if (sendRet != moveRet)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 			L"%s[%d] Session %d - sendRBuf moveReadPos Error (req - %d, ret - %d)\n",
-			_T(__FUNCTION__), __LINE__, session->_ID, sendRet, moveRet);
+			_T(__FUNCTION__), __LINE__, session->GetID(), sendRet, moveRet);
 
 		::wprintf(L"%s[%d] Session %d - sendRBuf moveReadPos Error (req - %d, ret - %d)\n",
-			_T(__FUNCTION__), __LINE__, session->_ID, sendRet, moveRet);
+			_T(__FUNCTION__), __LINE__, session->GetID(), sendRet, moveRet);
 
 		g_dump.Crash();
 		return;
@@ -409,7 +409,9 @@ void NetworkManager::AcceptProc()
 		return;
 	}
 
-	pSession->_socket = accept(_listensock, (SOCKADDR*)&pSession->_addr, &_addrlen);
+	SOCKADDR_IN tempAddr;
+	pSession->SetSocket(accept(_listensock, (SOCKADDR*)&tempAddr, &_addrlen));
+	pSession->SetAddr(tempAddr);
 	/*b++;
 	if (timeGetTime() - oldTick > 1000)
 	{
@@ -417,7 +419,7 @@ void NetworkManager::AcceptProc()
 		b = 0;
 		oldTick += 1000;
 	}*/
-	if (pSession->_socket == INVALID_SOCKET)
+	if (pSession->GetSocket() == INVALID_SOCKET)
 	{
 		int err = WSAGetLastError();
 		if (err == WSAEWOULDBLOCK)
@@ -439,10 +441,10 @@ void NetworkManager::AcceptProc()
 	LINGER optval;
 	optval.l_onoff = 1;
 	optval.l_linger = 0;
-	int optRet = setsockopt(pSession->_socket, SOL_SOCKET, SO_LINGER,
+	int optRet = setsockopt(pSession->GetSocket(), SOL_SOCKET, SO_LINGER,
 		(char*)&optval, sizeof(optval));
-	pSession->_lastRecvTime = timeGetTime();
-	_Sessions[pSession->_ID] = pSession;
+	pSession->SetLastRecvTime(timeGetTime());
+	_Sessions[pSession->GetID()] = pSession;
 	PRO_BEGIN(L"Ingame : CreatePlayer");
 	IngameManager::GetInstance().CreatePlayer(pSession);
 	PRO_END(L"Ingame : CreatePlayer");
@@ -455,39 +457,39 @@ void NetworkManager::AcceptProc()
 */
 void NetworkManager::RecvProc(Session* session)
 {
-	session->_lastRecvTime = timeGetTime();
+	session->SetLastRecvTime(timeGetTime());
 	PRO_BEGIN(L"Network: Recv");
 	int recvRet = 0;
 	
-	int directEnqueue = session->_recvRingBuf.DirectEnqueueSize();
+	int directEnqueue = session->GetRecvRingBuf().DirectEnqueueSize();
 	if (directEnqueue != 0)
 	{
-		recvRet = recv(session->_socket,
-			session->_recvRingBuf.GetWritePtr(),
+		recvRet = recv(session->GetSocket(),
+			session->GetRecvRingBuf().GetWritePtr(),
 			directEnqueue, 0);
 	}
 	else
 	{
-		int freeSize = session->_recvRingBuf.GetFreeSize();
+		int freeSize = session->GetRecvRingBuf().GetFreeSize();
 		if (freeSize != 0)
 		{
-			recvRet = recv(session->_socket,
-				session->_recvRingBuf.GetWritePtr(),
+			recvRet = recv(session->GetSocket(),
+				session->GetRecvRingBuf().GetWritePtr(),
 				freeSize, 0);
 		}
 		else
 		{
 			LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 				L"%s[%d]: Session %d Request recv Resize, %d\n",
-				_T(__FUNCTION__), __LINE__,session->_ID);
+				_T(__FUNCTION__), __LINE__,session->GetID());
 
 			::wprintf(L"%s[%d]: Session %d Request recv Resize, %d\n",
-				_T(__FUNCTION__), __LINE__, session->_ID);
-			session->_recvRingBuf.Resize(session->_recvRingBuf.GetBufferSize() * 1.5f);
+				_T(__FUNCTION__), __LINE__, session->GetID());
+			session->GetRecvRingBuf().Resize(session->GetRecvRingBuf().GetBufferSize() * 1.5f);
 			// 업데이트된 DirectEnqueueSize()를 캐싱
-			directEnqueue = session->_recvRingBuf.DirectEnqueueSize();
-			recvRet = recv(session->_socket,
-				session->_recvRingBuf.GetWritePtr(),
+			directEnqueue = session->GetRecvRingBuf().DirectEnqueueSize();
+			recvRet = recv(session->GetSocket(),
+				session->GetRecvRingBuf().GetWritePtr(),
 				directEnqueue, 0);
 		}
 	}
@@ -505,10 +507,10 @@ void NetworkManager::RecvProc(Session* session)
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d]: Session %d recv Error, %d\n",
-				_T(__FUNCTION__), __LINE__,session->_ID, err);
+				_T(__FUNCTION__), __LINE__,session->GetID(), err);
 
 			::wprintf(L"%s[%d]: Session %d recv Error, %d\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, err);
+				_T(__FUNCTION__), __LINE__, session->GetID(), err);
 
 			session->SetSessionDead();
 			return;
@@ -528,34 +530,34 @@ void NetworkManager::RecvProc(Session* session)
 		return;
 	}
 
-	int moveRet = session->_recvRingBuf.MoveWritePos(recvRet);
+	int moveRet = session->GetRecvRingBuf().MoveWritePos(recvRet);
 	if (recvRet != moveRet)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 			L"%s[%d] Session %d - recvRBuf moveWritePos Error (req - %d, ret - %d)\n",
-			_T(__FUNCTION__), __LINE__, session->_ID, recvRet, moveRet);
+			_T(__FUNCTION__), __LINE__, session->GetID(), recvRet, moveRet);
 
 		::wprintf(L"%s[%d] Session %d - recvRBuf moveWritePos Error (req - %d, ret - %d)\n",
-			_T(__FUNCTION__), __LINE__, session->_ID, recvRet, moveRet);
+			_T(__FUNCTION__), __LINE__, session->GetID(), recvRet, moveRet);
 
 		g_dump.Crash();
 		return;
 	}
 
-	Player* pPlayer = IngameManager::GetInstance()._Players[session->_ID];
+	Player* pPlayer = IngameManager::GetInstance()._Players[session->GetID()];
 	if (pPlayer == nullptr)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 			L"%s[%d] Session %d player is nullptr\n",
-			_T(__FUNCTION__), __LINE__, session->_ID);
+			_T(__FUNCTION__), __LINE__, session->GetID());
 
 		::wprintf(L"%s[%d] Session %d player is nullptr\n",
-			_T(__FUNCTION__), __LINE__, session->_ID);
+			_T(__FUNCTION__), __LINE__, session->GetID());
 
 		g_dump.Crash();
 		return;
 	}
-	int iUsedSize = session->_recvRingBuf.GetUseSize();
+	int iUsedSize = session->GetRecvRingBuf().GetUseSize();
 	// recvRingbuf에서 해당 세션으로 들어온 여러 패킷들 다 처리할 때 까지
 	PRO_BEGIN(L"Network : HandlePacket");
 	while (iUsedSize > 0)
@@ -564,15 +566,15 @@ void NetworkManager::RecvProc(Session* session)
 			break;
 
 		stPACKET_HEADER header;
-		int peekRet = session->_recvRingBuf.Peek((char*)&header, dfPACKET_HEADER_SIZE);
+		int peekRet = session->GetRecvRingBuf().Peek((char*)&header, dfPACKET_HEADER_SIZE);
 		if (peekRet != dfPACKET_HEADER_SIZE)//setsessiondead 안하는 이유 : 
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d]  Session %d - recvRBuf Peek Error (req - %d, ret - %d)\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, dfPACKET_HEADER_SIZE, peekRet);
+				_T(__FUNCTION__), __LINE__, session->GetID(), dfPACKET_HEADER_SIZE, peekRet);
 
 			::wprintf(L"%s[%d]  Session %d - recvRBuf Peek Error (req - %d, ret - %d)\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, dfPACKET_HEADER_SIZE, peekRet);
+				_T(__FUNCTION__), __LINE__, session->GetID(), dfPACKET_HEADER_SIZE, peekRet);
 
 			g_dump.Crash();
 			return;
@@ -582,10 +584,10 @@ void NetworkManager::RecvProc(Session* session)
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d]: Session %d Wrong Header Code Error, %x\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, header.code);
+				_T(__FUNCTION__), __LINE__, session->GetID(), header.code);
 
 			::wprintf(L"%s[%d]: Session %d Wrong Header Code Error, %x\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, header.code);
+				_T(__FUNCTION__), __LINE__, session->GetID(), header.code);
 
 			session->SetSessionDead();
 			return;
@@ -594,15 +596,15 @@ void NetworkManager::RecvProc(Session* session)
 		if (iUsedSize < dfPACKET_HEADER_SIZE + header.payload_size)
 			break;
 
-		int moveReadRet = session->_recvRingBuf.MoveReadPos(dfPACKET_HEADER_SIZE);
+		int moveReadRet = session->GetRecvRingBuf().MoveReadPos(dfPACKET_HEADER_SIZE);
 		if (moveReadRet != dfPACKET_HEADER_SIZE)
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d] Session %d - recvRBuf moveReadPos Error (req - %d, ret - %d)\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, dfPACKET_HEADER_SIZE, moveReadRet);
+				_T(__FUNCTION__), __LINE__, session->GetID(), dfPACKET_HEADER_SIZE, moveReadRet);
 
 			::wprintf(L"%s[%d] Session %d - recvRBuf moveReadPos Error (req - %d, ret - %d)\n",
-				_T(__FUNCTION__), __LINE__, session->_ID, dfPACKET_HEADER_SIZE, moveReadRet);
+				_T(__FUNCTION__), __LINE__, session->GetID(), dfPACKET_HEADER_SIZE, moveReadRet);
 
 			g_dump.Crash();
 			return;
@@ -613,16 +615,16 @@ void NetworkManager::RecvProc(Session* session)
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d]: Session %d Handle CS Packet Error\n",
-				_T(__FUNCTION__), __LINE__, session->_ID);
+				_T(__FUNCTION__), __LINE__, session->GetID());
 
 			::wprintf(L"%s[%d]: Session %d Handle CS Packet Error\n",
-				_T(__FUNCTION__), __LINE__, session->_ID);
+				_T(__FUNCTION__), __LINE__, session->GetID());
 
 			session->SetSessionDead();
 			return;
 		}
 
-		iUsedSize = session->_recvRingBuf.GetUseSize();
+		iUsedSize = session->GetRecvRingBuf().GetUseSize();
 	}
 	PRO_END(L"Network : HandlePacket");
 }
@@ -660,9 +662,9 @@ void NetworkManager::DisconnectDeadSessions()
 			}
 		}
 		
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int deleteRet = SetSCPacket_DELETE_CHARACTER(&pPlayer->GetSession()->_sendSerialPacket, pPlayer->GetID());
-		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), deleteRet, pPlayer->GetSector());
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int deleteRet = SetSCPacket_DELETE_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(), pPlayer->GetID());
+		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), deleteRet, pPlayer->GetSector());
 		IngameManager::GetInstance()._pPlayerPool->Free(pPlayer);
 		
 		Session* pSession = _Sessions[ID];
@@ -681,7 +683,7 @@ void NetworkManager::DisconnectDeadSessions()
 
 		_Sessions[ID] = nullptr;
 
-		closesocket(pSession->_socket);	
+		closesocket(pSession->GetSocket());	
 		_pSessionPool->Free(pSession);
 		_usableSessionID[_usableCnt++] = ID;
 	}
@@ -731,9 +733,9 @@ bool NetworkManager::HandleCSPacket_MoveStart(Player* pPlayer)
 	short X;
 	short Y;
 
-	pPlayer->GetSession()->_recvSerialPacket.Clear();
+	pPlayer->GetSession()->GetRecvSerialPacket().Clear();
 	int size = sizeof(moveDirection) + sizeof(X) + sizeof(Y);
-	int dequeueRet = pPlayer->GetSession()->_recvRingBuf.Dequeue(pPlayer->GetSession()->_recvSerialPacket.GetWritePtr(), size);
+	int dequeueRet = pPlayer->GetSession()->GetRecvRingBuf().Dequeue(pPlayer->GetSession()->GetRecvSerialPacket().GetWritePtr(), size);
 	if (dequeueRet != size)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
@@ -746,24 +748,24 @@ bool NetworkManager::HandleCSPacket_MoveStart(Player* pPlayer)
 		g_dump.Crash();
 		return false;
 	}
-	pPlayer->GetSession()->_recvSerialPacket.MoveWritePos(size);
+	pPlayer->GetSession()->GetRecvSerialPacket().MoveWritePos(size);
 
-	pPlayer->GetSession()->_recvSerialPacket >> moveDirection;
-	pPlayer->GetSession()->_recvSerialPacket >> X;
-	pPlayer->GetSession()->_recvSerialPacket >> Y;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> moveDirection;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> X;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> Y;
 
 	if (abs(X - pPlayer->GetX()) > dfERROR_RANGE ||
 		abs(Y - pPlayer->GetY()) > dfERROR_RANGE)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port),X,Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port),X,Y);
 		::wprintf(L"%s[%d] SessionID : %d (socket port :%u) (%d, %d)\n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
@@ -774,10 +776,10 @@ bool NetworkManager::HandleCSPacket_MoveStart(Player* pPlayer)
 
 	IngameManager::GetInstance().UpdateSector(pPlayer);
 
-	pPlayer->GetSession()->_sendSerialPacket.Clear();
-	int setRet = SetSCPacket_MOVE_START(&pPlayer->GetSession()->_sendSerialPacket, 
+	pPlayer->GetSession()->GetSendSerialPacket().Clear();
+	int setRet = SetSCPacket_MOVE_START(&pPlayer->GetSession()->GetSendSerialPacket(), 
 		pPlayer->GetID(), pPlayer->GetMoveDirection(), pPlayer->GetX(), pPlayer->GetY());
-	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSector(), pPlayer->GetSession());
+	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSector(), pPlayer->GetSession());
 	return true;
 }
 
@@ -787,9 +789,9 @@ bool NetworkManager::HandleCSPacket_MoveStop(Player* pPlayer)
 	short X;
 	short Y;
 
-	pPlayer->GetSession()->_recvSerialPacket.Clear();
+	pPlayer->GetSession()->GetRecvSerialPacket().Clear();
 	int size = sizeof(headDirection) + sizeof(X) + sizeof(Y);
-	int dequeueRet = pPlayer->GetSession()->_recvRingBuf.Dequeue(pPlayer->GetSession()->_recvSerialPacket.GetWritePtr(), size);
+	int dequeueRet = pPlayer->GetSession()->GetRecvRingBuf().Dequeue(pPlayer->GetSession()->GetRecvSerialPacket().GetWritePtr(), size);
 	if (dequeueRet != size)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
@@ -802,24 +804,24 @@ bool NetworkManager::HandleCSPacket_MoveStop(Player* pPlayer)
 		g_dump.Crash();
 		return false;
 	}
-	pPlayer->GetSession()->_recvSerialPacket.MoveWritePos(size);
+	pPlayer->GetSession()->GetRecvSerialPacket().MoveWritePos(size);
 
-	pPlayer->GetSession()->_recvSerialPacket >> headDirection;
-	pPlayer->GetSession()->_recvSerialPacket >> X;
-	pPlayer->GetSession()->_recvSerialPacket >> Y;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> headDirection;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> X;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> Y;
 
 	if (abs(X - pPlayer->GetX()) > dfERROR_RANGE ||
 		abs(Y - pPlayer->GetY()) > dfERROR_RANGE)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port),X,Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port),X,Y);
 		::wprintf(L"%s[%d] SessionID : %d (socket port :%u) (%d, %d)\n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
@@ -830,10 +832,10 @@ bool NetworkManager::HandleCSPacket_MoveStop(Player* pPlayer)
 
 	IngameManager::GetInstance().UpdateSector(pPlayer);
 
-	pPlayer->GetSession()->_sendSerialPacket.Clear();
-	int setRet = SetSCPacket_MOVE_STOP(&pPlayer->GetSession()->_sendSerialPacket, 
+	pPlayer->GetSession()->GetSendSerialPacket().Clear();
+	int setRet = SetSCPacket_MOVE_STOP(&pPlayer->GetSession()->GetSendSerialPacket(), 
 		pPlayer->GetID(), pPlayer->GetHeadDirection(), pPlayer->GetX(), pPlayer->GetY());
-	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSector(), pPlayer->GetSession());
+	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSector(), pPlayer->GetSession());
 	return true;
 }
 
@@ -843,9 +845,9 @@ bool NetworkManager::HandleCSPacket_Attack1(Player* pPlayer)
 	short X;
 	short Y;
 
-	pPlayer->GetSession()->_recvSerialPacket.Clear();
+	pPlayer->GetSession()->GetRecvSerialPacket().Clear();
 	int size = sizeof(headDirection) + sizeof(X) + sizeof(Y);
-	int dequeueRet = pPlayer->GetSession()->_recvRingBuf.Dequeue(pPlayer->GetSession()->_recvSerialPacket.GetWritePtr(), size);
+	int dequeueRet = pPlayer->GetSession()->GetRecvRingBuf().Dequeue(pPlayer->GetSession()->GetRecvSerialPacket().GetWritePtr(), size);
 	if (dequeueRet != size)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
@@ -858,25 +860,25 @@ bool NetworkManager::HandleCSPacket_Attack1(Player* pPlayer)
 		g_dump.Crash();
 		return false;
 	}
-	pPlayer->GetSession()->_recvSerialPacket.MoveWritePos(size);
+	pPlayer->GetSession()->GetRecvSerialPacket().MoveWritePos(size);
 
-	pPlayer->GetSession()->_recvSerialPacket >> headDirection;
-	pPlayer->GetSession()->_recvSerialPacket >> X;
-	pPlayer->GetSession()->_recvSerialPacket >> Y;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> headDirection;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> X;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> Y;
 
 
 	if (abs(X - pPlayer->GetX()) > dfERROR_RANGE ||
 		abs(Y - pPlayer->GetY()) > dfERROR_RANGE)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 		::wprintf(L"%s[%d] SessionID : %d (socket port :%u) (%d, %d)\n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
@@ -886,17 +888,17 @@ bool NetworkManager::HandleCSPacket_Attack1(Player* pPlayer)
 	Player* damagedPlayer = nullptr;
 	pPlayer->SetPlayerAttack1(damagedPlayer, headDirection, X, Y);
 
-	pPlayer->GetSession()->_sendSerialPacket.Clear();
-	int attackSetRet = SetSCPacket_ATTACK1(&pPlayer->GetSession()->_sendSerialPacket,
+	pPlayer->GetSession()->GetSendSerialPacket().Clear();
+	int attackSetRet = SetSCPacket_ATTACK1(&pPlayer->GetSession()->GetSendSerialPacket(),
 		pPlayer->GetID(), pPlayer->GetHeadDirection(), pPlayer->GetX(), pPlayer->GetY());
-	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), attackSetRet, pPlayer->GetSector());
+	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), attackSetRet, pPlayer->GetSector());
 
 	if (damagedPlayer != nullptr)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int damageSetRet = SetSCPacket_DAMAGE(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int damageSetRet = SetSCPacket_DAMAGE(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), damagedPlayer->GetID(), damagedPlayer->GetHp());
-		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), damageSetRet, damagedPlayer->GetSector());
+		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), damageSetRet, damagedPlayer->GetSector());
 	}
 	return true;
 }
@@ -907,9 +909,9 @@ bool NetworkManager::HandleCSPacket_Attack2(Player* pPlayer)
 	short X;
 	short Y;
 
-	pPlayer->GetSession()->_recvSerialPacket.Clear();
+	pPlayer->GetSession()->GetRecvSerialPacket().Clear();
 	int size = sizeof(headDirection) + sizeof(X) + sizeof(Y);
-	int dequeueRet = pPlayer->GetSession()->_recvRingBuf.Dequeue(pPlayer->GetSession()->_recvSerialPacket.GetWritePtr(), size);
+	int dequeueRet = pPlayer->GetSession()->GetRecvRingBuf().Dequeue(pPlayer->GetSession()->GetRecvSerialPacket().GetWritePtr(), size);
 	if (dequeueRet != size)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
@@ -922,24 +924,24 @@ bool NetworkManager::HandleCSPacket_Attack2(Player* pPlayer)
 		g_dump.Crash();
 		return false;
 	}
-	pPlayer->GetSession()->_recvSerialPacket.MoveWritePos(size);
+	pPlayer->GetSession()->GetRecvSerialPacket().MoveWritePos(size);
 
-	pPlayer->GetSession()->_recvSerialPacket >> headDirection;
-	pPlayer->GetSession()->_recvSerialPacket >> X;
-	pPlayer->GetSession()->_recvSerialPacket >> Y;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> headDirection;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> X;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> Y;
 
 	if (abs(X - pPlayer->GetX()) > dfERROR_RANGE ||
 		abs(Y - pPlayer->GetY()) > dfERROR_RANGE)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 		::wprintf(L"%s[%d] SessionID : %d (socket port :%u) (%d, %d)\n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
@@ -950,17 +952,17 @@ bool NetworkManager::HandleCSPacket_Attack2(Player* pPlayer)
 	Player* damagedPlayer = nullptr;
 	pPlayer->SetPlayerAttack2(damagedPlayer, headDirection, X, Y);
 
-	pPlayer->GetSession()->_sendSerialPacket.Clear();
-	int attackSetRet = SetSCPacket_ATTACK2(&pPlayer->GetSession()->_sendSerialPacket,
+	pPlayer->GetSession()->GetSendSerialPacket().Clear();
+	int attackSetRet = SetSCPacket_ATTACK2(&pPlayer->GetSession()->GetSendSerialPacket(),
 		pPlayer->GetID(), pPlayer->GetHeadDirection(), pPlayer->GetX(), pPlayer->GetY());
-	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), attackSetRet, pPlayer->GetSector());
+	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), attackSetRet, pPlayer->GetSector());
 
 	if (damagedPlayer != nullptr)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int damageSetRet = SetSCPacket_DAMAGE(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int damageSetRet = SetSCPacket_DAMAGE(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), damagedPlayer->GetID(), damagedPlayer->GetHp());
-		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), damageSetRet, damagedPlayer->GetSector());
+		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), damageSetRet, damagedPlayer->GetSector());
 	}
 
 	return true;
@@ -972,9 +974,9 @@ bool NetworkManager::HandleCSPacket_Attack3(Player* pPlayer)
 	short X;
 	short Y;
 
-	pPlayer->GetSession()->_recvSerialPacket.Clear();
+	pPlayer->GetSession()->GetRecvSerialPacket().Clear();
 	int size = sizeof(headDirection) + sizeof(X) + sizeof(Y);
-	int dequeueRet = pPlayer->GetSession()->_recvRingBuf.Dequeue(pPlayer->GetSession()->_recvSerialPacket.GetWritePtr(), size);
+	int dequeueRet = pPlayer->GetSession()->GetRecvRingBuf().Dequeue(pPlayer->GetSession()->GetRecvSerialPacket().GetWritePtr(), size);
 	if (dequeueRet != size)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
@@ -987,25 +989,25 @@ bool NetworkManager::HandleCSPacket_Attack3(Player* pPlayer)
 		g_dump.Crash();
 		return false;
 	}
-	pPlayer->GetSession()->_recvSerialPacket.MoveWritePos(size);
+	pPlayer->GetSession()->GetRecvSerialPacket().MoveWritePos(size);
 
-	pPlayer->GetSession()->_recvSerialPacket >> headDirection;
-	pPlayer->GetSession()->_recvSerialPacket >> X;
-	pPlayer->GetSession()->_recvSerialPacket >> Y;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> headDirection;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> X;
+	pPlayer->GetSession()->GetRecvSerialPacket() >> Y;
 
 
 	if (abs(X - pPlayer->GetX()) > dfERROR_RANGE ||
 		abs(Y - pPlayer->GetY()) > dfERROR_RANGE)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 		::wprintf(L"%s[%d] SessionID : %d (socket port :%u) (%d, %d)\n",
-			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->_ID, ntohs(pPlayer->GetSession()->_addr.sin_port), X, Y);
+			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
 
 		X = pPlayer->GetX();
 		Y = pPlayer->GetY();
@@ -1015,17 +1017,17 @@ bool NetworkManager::HandleCSPacket_Attack3(Player* pPlayer)
 	Player* damagedPlayer = nullptr;
 	pPlayer->SetPlayerAttack3(damagedPlayer, headDirection, X, Y);
 
-	pPlayer->GetSession()->_sendSerialPacket.Clear();
-	int attackSetRet = SetSCPacket_ATTACK3(&pPlayer->GetSession()->_sendSerialPacket,
+	pPlayer->GetSession()->GetSendSerialPacket().Clear();
+	int attackSetRet = SetSCPacket_ATTACK3(&pPlayer->GetSession()->GetSendSerialPacket(),
 		pPlayer->GetID(), pPlayer->GetHeadDirection(), pPlayer->GetX(), pPlayer->GetY());
-	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), attackSetRet, pPlayer->GetSector());
+	IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), attackSetRet, pPlayer->GetSector());
 
 	if (damagedPlayer != nullptr)
 	{
-		pPlayer->GetSession()->_sendSerialPacket.Clear();
-		int damageSetRet = SetSCPacket_DAMAGE(&pPlayer->GetSession()->_sendSerialPacket,
+		pPlayer->GetSession()->GetSendSerialPacket().Clear();
+		int damageSetRet = SetSCPacket_DAMAGE(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), damagedPlayer->GetID(), damagedPlayer->GetHp());
-		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), damageSetRet, damagedPlayer->GetSector());
+		IngameManager::GetInstance().SendPacketAroundSector(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), damageSetRet, damagedPlayer->GetSector());
 	}
 
 	return true;
@@ -1056,14 +1058,14 @@ bool NetworkManager::HandleCSPacket_ECHO(Player* pPlayer)
 {
 	int time;
 
-	pPlayer->GetSession()->_recvSerialPacket.Clear();
+	pPlayer->GetSession()->GetRecvSerialPacket().Clear();
 
-	bool getRet = GetCSPacket_ECHO(&pPlayer->GetSession()->_recvSerialPacket, &pPlayer->GetSession()->_recvRingBuf, time);
+	bool getRet = GetCSPacket_ECHO(&pPlayer->GetSession()->GetRecvSerialPacket(), &pPlayer->GetSession()->GetRecvRingBuf(), time);
 	if (!getRet) return false;
 	
-	pPlayer->GetSession()->_sendSerialPacket.Clear();
-	int setRet = SetSCPacket_ECHO(&pPlayer->GetSession()->_sendSerialPacket, time);
-	SendPacketUnicast(pPlayer->GetSession()->_sendSerialPacket.GetReadPtr(), setRet, pPlayer->GetSession());
+	pPlayer->GetSession()->GetSendSerialPacket().Clear();
+	int setRet = SetSCPacket_ECHO(&pPlayer->GetSession()->GetSendSerialPacket(), time);
+	SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 	
 	return true;
 }
@@ -1081,15 +1083,15 @@ void NetworkManager::SendPacketUnicast(char* msg, int size, Session* session)
 		g_dump.Crash();
 		return;
 	}
-	int enqueueRet = session->_sendRingBuf.Enqueue(msg, size);
+	int enqueueRet = session->GetSendRingBuf().Enqueue(msg, size);
 	if (enqueueRet != size)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 			L"%s[%d] Session %d - sendRBuf Enqueue Error (req - %d, ret - %d)\n",
-			_T(__FUNCTION__), __LINE__, session->_ID, size, enqueueRet);
+			_T(__FUNCTION__), __LINE__, session->GetID(), size, enqueueRet);
 
 		::wprintf(L"%s[%d] Session %d - sendRBuf Enqueue Error (req - %d, ret - %d)\n",
-			_T(__FUNCTION__), __LINE__, session->_ID, size, enqueueRet);
+			_T(__FUNCTION__), __LINE__, session->GetID(), size, enqueueRet);
 
 		g_dump.Crash();
 		return;

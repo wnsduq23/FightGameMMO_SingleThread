@@ -3,12 +3,12 @@
 
 void Session::SetSessionDead()
 {
-	if (_bAlive)
+	if (GetSessionAlive())
 	{
 		_bAlive = false;
 
 		NetworkManager& nm = NetworkManager::GetInstance();
-		nm._disconnectSessionIDs[nm._disconnectCnt] = _ID;
+		nm._disconnectSessionIDs[nm._disconnectCnt] = GetID();
 		nm._disconnectCnt++;
 	}
 }

@@ -9,45 +9,45 @@
 
 /* ===============================================
 
-<< __OBJECT_POOL_DEBUG__ ¼³¸í >>
+<< __OBJECT_POOL_DEBUG__ ì„¤ëª… >>
 
 1. Node
 
-head¿Í tail¿¡ °ËÁõ ¹× µğ¹ö±ëÀ» À§ÇÑ °ªÀÌ µé¾î°£´Ù.
-head, tailÀº ÇÒ´çµÈ µ¥ÀÌÅÍ °ü¸®¸¦ À§ÇÑ °ÍÀÌ¹Ç·Î
-Alloc¿¡¼­ °ªÀÌ Á¤ÇØÁö°í Free¿¡¼­ È®ÀÎÇÑ´Ù.
+headì™€ tailì€ ê°ê° ë…¸ë“œì˜ ì•ë’¤ë¥¼ ë‚˜íƒ€ë‚´ëŠ” í¬ì¸í„°ì´ë‹¤.
+head, tailì€ í• ë‹¹ëœ ë…¸ë“œì˜ ì•ë’¤ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ê²ƒì´ë¯€ë¡œ
+Allocì—ì„œ í• ë‹¹ëœ ë…¸ë“œì˜ ì•ë’¤ë¥¼ Freeì—ì„œ í™•ì¸í•œë‹¤.
 
-ÀÌ ¸ğµå°¡ ¾Æ´Ò ¶§´Â tail¿¡ ´ÙÀ½ nodeÀÇ ÁÖ¼Ò°ª¸¸ µé¾î°£´Ù.
+ì´ ë…¸ë“œê°€ ì•„ë‹Œ ê²½ìš° tailì€ ë‹¤ìŒ nodeì˜ í¬ì¸í„°ë¥¼ ë‚˜íƒ€ë‚¸ë‹¤.
 
 1) head
 
-32bitÀÏ °æ¿ì, »óÀ§ 1byte·Î Object pool ID¸¦
-ÇÏÀ§ 3byte·Î Data ÁÖ¼ÒÀÇ ÇÏÀ§ 3byte¸¦ °¡Áø´Ù.
-64bitÀÏ °æ¿ì, »óÀ§ 4byte·Î 0x0000À»,
-ÇÏÀ§ 4byte·Î 32bit¿¡¼­ÀÇ head °ªÀ» °¡Áø´Ù.
+32bitì˜ ê²½ìš°, ì• 1byteëŠ” Object pool IDì´ê³ 
+ë’¤ 3byteëŠ” Data ì£¼ì†Œì˜ ë’¤ 3byteë¥¼ ë‚˜íƒ€ë‚¸ë‹¤.
+64bitì˜ ê²½ìš°, ì• 4byteëŠ” 0x0000ì´ê³ ,
+ë’¤ 4byteëŠ” 32bitì™€ ê°™ì€ head êµ¬ì¡°ë¥¼ ë‚˜íƒ€ë‚¸ë‹¤.
 
-Object pool ID´Â unsigned char(0~255)ÀÌ¸ç
-±× ÀÌ»óÀÇ Object poolÀÌ ¸¸µé¾îÁö´Â °ÍÀº ´ëºñÇÏÁö ¾Ê¾Ò´Ù.
+Object pool IDëŠ” unsigned char(0~255)ì´ë¯€ë¡œ
+ì´ ì´ìƒì˜ Object poolì€ ìƒì„±í•  ìˆ˜ ì—†ë‹¤.
 
 2) tail
 
-tail´Â ÇØÁ¦µÇ¾î pool ¾È¿¡ ÀÖÀ» ¶§´Â ´ÙÀ½ nodeÀÇ ÁÖ¼Ò¸¦,
-ÇÒ´çµÇ¾î pool ¹Û¿¡ ÀÖÀ» ¶§´Â head¿Í µ¿ÀÏÇÑ °ªÀ» °¡Áø´Ù.
+tailì€ í• ë‹¹ë˜ì§€ ì•Šì€ pool ì•ˆì˜ ë‹¤ìŒ ë…¸ë“œì˜ í¬ì¸í„°ì´ê³ ,
+í• ë‹¹ëœ pool ë°–ì˜ ë…¸ë“œì˜ headì™€ ê°™ì€ êµ¬ì¡°ë¥¼ ë‚˜íƒ€ë‚¸ë‹¤.
 
-3) °ËÁõ ¹æ¹ı
+3) í• ë‹¹ ê²€ì¦
 
-Free°¡ È£ÃâµÇ¸é ¾Æ·¡ »çÇ×µéÀ» Ã¼Å©ÇÑ´Ù.
-- head¿Í tailÀÌ ¼­·Î °°Àº °ªÀ» °¡Áö´ÂÁö
-- pool ID¿Í instance ID¸¦ ¹ÙÅÁÀ¸·Î ³ª¿Ã ¼ö ÀÖ´Â °ªÀÎÁö
+Freeê°€ í˜¸ì¶œë˜ë©´ ì•„ë˜ ì‚¬í•­ë“¤ì„ ì²´í¬í•œë‹¤.
+- headì™€ tailì´ ê°™ì€ êµ¬ì¡°ë¥¼ ë‚˜íƒ€ë‚´ëŠ”ì§€
+- pool IDì™€ instance IDê°€ ì¼ì¹˜í•˜ëŠ”ì§€ ë“±
 
-¸¸Á·ÇÏÁö ¾ÊÀ» °æ¿ì, Pool¿¡ ¼ÓÇÏÁö ¾Ê´Â µ¥ÀÌÅÍÀÇ ÇØÁ¦ ¿äÃ»,
-Overflow/Underflow Áß ÇÑ°¡Áö °æ¿ì·Î ÆÇ´ÜÇÏ¿© ¿¹¿Ü¸¦ ´øÁø´Ù.
+ì¼ì¹˜í•˜ì§€ ì•ŠëŠ” ê²½ìš°, Poolì—ì„œ í• ë‹¹ë˜ì§€ ì•Šì€ ë…¸ë“œì— ëŒ€í•œ í•´ì œ ìš”ì²­,
+Overflow/Underflow ë“±ì´ ë°œìƒí–ˆìŒì„ ì˜ë¯¸í•˜ê³  í¬ë˜ì‹œë¥¼ ë°œìƒì‹œí‚¨ë‹¤.
 
 2. UseCount, Capacity
 
-UseCount¿Í Capacity¸¦ °è»êÇÏ¿© ÇÊ¿äÇÒ ¶§ Ãâ·ÂÇÒ ¼ö ÀÖµµ·Ï ÇÑ´Ù.
-¶Ç, Pool ¼Ò¸ê ½Ã UseCount¸¦ È®ÀÎÇÏ¿© ¹Ì¹İÈ¯ µ¥ÀÌÅÍ°¡ ÀÖÀ¸¸é ¾Ë¸°´Ù.
-ÇöÀç´Â ¸Ş½ÃÁö¸¦ ÄÜ¼Ö¿¡ Ãâ·ÂÇÏ°í ÀÖÀ¸¸ç ÃßÈÄ º¯°æÇÒ ¿¹Á¤ÀÌ´Ù.
+UseCountì™€ Capacityë¥¼ ì‚¬ìš©í•´ì„œ í•„ìš”í•œ ë…¸ë“œì˜ ê°œìˆ˜ë¥¼ íŒŒì•…í•œë‹¤.
+ì¦‰, Pool í•´ì œ ì‹œ UseCountë¥¼ í™•ì¸í•´ì„œ ì´ë¯¸ í•´ì œëœ ë…¸ë“œì¸ì§€ ì•Œ ìˆ˜ ìˆë‹¤.
+ì´ëŸ° ë©”ì‹œì§€ë¥¼ ê°„ë‹¨í•˜ê³  ëª…í™•í•˜ê²Œ ì²˜ë¦¬í•´ì„œ ë””ë²„ê¹…ì„ ìš©ì´í•˜ê²Œ í•œë‹¤.
 
 ==================================================*/
 
@@ -91,7 +91,7 @@ public:
 private:
 	bool _bPlacementNew;
 	int _iBlockNum;
-	stNODE* _pFreeNode = nullptr; // ÇÒ´çµÇÁö ¾Ê°í »ç¿ë °¡´ÉÇÑ ³ëµå
+	stNODE* _pFreeNode = nullptr; // í• ë‹¹ë˜ì§€ ì•Šì€ ë…¸ë“œì˜ ë¦¬ìŠ¤íŠ¸
 
 #ifdef __OBJECT_POOL_DEBUG__
 public:
@@ -123,7 +123,7 @@ ObjectPool<DATA>::ObjectPool(int iBlockNum, bool bPlacementNew, Types... args)
 
 	if (_bPlacementNew)
 	{
-		// Alloc ½Ã DataÀÇ »ı¼ºÀÚ¸¦ È£ÃâÇÏ¹Ç·Î ÀÌ¶§ È£ÃâÇÏ¸é ¾ÈµÈ´Ù
+		// Alloc ì‹œ Dataì˜ ìƒì„±ìë¥¼ í˜¸ì¶œí•˜ë¯€ë¡œ ì—¬ê¸°ì„œ í˜¸ì¶œí•˜ì§€ ì•ŠëŠ”ë‹¤
 
 		_pFreeNode = (stNODE*)malloc(sizeof(stNODE));
 		_pFreeNode->tail = (size_t)nullptr;
@@ -136,7 +136,7 @@ ObjectPool<DATA>::ObjectPool(int iBlockNum, bool bPlacementNew, Types... args)
 	}
 	else
 	{
-		// Alloc ½Ã DataÀÇ »ı¼ºÀÚ¸¦ È£ÃâÇÏÁö ¾ÊÀ¸¹Ç·Î ÀÌ¶§ È£ÃâÇØ¾ß µÈ´Ù
+		// Alloc ì‹œ Dataì˜ ìƒì„±ìë¥¼ í˜¸ì¶œí•˜ì§€ ì•Šìœ¼ë¯€ë¡œ ì—¬ê¸°ì„œ í˜¸ì¶œí•´ì•¼ í•œë‹¤
 
 		_pFreeNode = (stNODE*)malloc(sizeof(stNODE));
 		_pFreeNode->tail = (size_t)nullptr;
@@ -176,7 +176,7 @@ ObjectPool<DATA>::~ObjectPool()
 
 	if (_bPlacementNew)
 	{
-		// Free ½Ã DataÀÇ ¼Ò¸êÀÚ¸¦ È£ÃâÇÏ¹Ç·Î ÀÌ¶§´Â È£ÃâÇÏ¸é ¾ÈµÈ´Ù
+		// Free ì‹œ Dataì˜ ì†Œë©¸ìë¥¼ í˜¸ì¶œí•˜ë¯€ë¡œ ì—¬ê¸°ì„œ í˜¸ì¶œí•˜ì§€ ì•ŠëŠ”ë‹¤
 
 		while (_pFreeNode->tail != (size_t)nullptr)
 		{
@@ -188,7 +188,7 @@ ObjectPool<DATA>::~ObjectPool()
 	}
 	else
 	{
-		// Free ½Ã DataÀÇ ¼Ò¸êÀÚ¸¦ È£ÃâÇÏÁö ¾ÊÀ¸¹Ç·Î ÀÌ¶§ È£ÃâÇØ¾ß µÈ´Ù
+		// Free ì‹œ Dataì˜ ì†Œë©¸ìë¥¼ í˜¸ì¶œí•˜ì§€ ì•Šìœ¼ë¯€ë¡œ ì—¬ê¸°ì„œ í˜¸ì¶œí•´ì•¼ í•œë‹¤
 
 		while (_pFreeNode->tail != (size_t)nullptr)
 		{
@@ -204,11 +204,11 @@ ObjectPool<DATA>::~ObjectPool()
 
 template<class DATA>
 template<typename... Types>
-DATA* ObjectPool<DATA>::Alloc(Types... args)
+inline DATA* ObjectPool<DATA>::Alloc(Types... args)
 {
 	if (_pFreeNode == nullptr)
 	{
-		// ÃÖÃÊ »ı¼ºÀÎ °æ¿ì DataÀÇ »ı¼ºÀÚ¸¦ È£ÃâÇÑ´Ù
+		// ì—¬ìœ  ë…¸ë“œê°€ ì—†ìœ¼ë©´ Dataì˜ ìƒì„±ìë¥¼ í˜¸ì¶œí•œë‹¤
 
 		stNODE* pNew = (stNODE*)malloc(sizeof(stNODE));
 		new (&(pNew->data)) DATA(args...);
@@ -232,7 +232,7 @@ DATA* ObjectPool<DATA>::Alloc(Types... args)
 
 	if (_bPlacementNew)
 	{
-		// _pFreeNode¿¡¼­ °¡Á®¿Â ÈÄ DataÀÇ »ı¼ºÀÚ¸¦ È£ÃâÇÑ´Ù
+		// _pFreeNodeì—ì„œ ë…¸ë“œë¥¼ ê°€ì ¸ì™€ì„œ Dataì˜ ìƒì„±ìë¥¼ í˜¸ì¶œí•œë‹¤
 
 		stNODE* p = _pFreeNode;
 		_pFreeNode = (stNODE*)_pFreeNode->tail;
@@ -254,7 +254,7 @@ DATA* ObjectPool<DATA>::Alloc(Types... args)
 	}
 	else
 	{
-		// _pFreeNode¿¡¼­ °¡Á®¿Â ÈÄ DataÀÇ »ı¼ºÀÚ¸¦ È£ÃâÇÏÁö ¾Ê´Â´Ù
+		// _pFreeNodeì—ì„œ ë…¸ë“œë¥¼ ê°€ì ¸ì™€ì„œ Dataì˜ ìƒì„±ìë¥¼ í˜¸ì¶œí•˜ì§€ ì•ŠëŠ”ë‹¤
 
 		stNODE* p = _pFreeNode;
 		_pFreeNode = (stNODE*)_pFreeNode->tail;
@@ -279,11 +279,11 @@ DATA* ObjectPool<DATA>::Alloc(Types... args)
 }
 
 template<class DATA>
-bool ObjectPool<DATA>::Free(DATA* pData)
+inline bool ObjectPool<DATA>::Free(DATA* pData)
 {
 	if (_bPlacementNew)
 	{
-		// DataÀÇ ¼Ò¸êÀÚ¸¦ È£ÃâÇÑ ÈÄ _pFreeNode¿¡ pushÇÑ´Ù
+		// Dataì˜ ì†Œë©¸ìë¥¼ í˜¸ì¶œí•˜ê³  _pFreeNodeì— pushí•œë‹¤
 
 #ifdef __OBJECT_POOL_DEBUG__
 
@@ -324,7 +324,7 @@ bool ObjectPool<DATA>::Free(DATA* pData)
 	}
 	else
 	{
-		// DataÀÇ ¼Ò¸êÀÚ¸¦ È£ÃâÇÏÁö ¾Ê°í _pFreeNode¿¡ pushÇÑ´Ù
+		// Dataì˜ ì†Œë©¸ìë¥¼ í˜¸ì¶œí•˜ì§€ ì•Šê³  _pFreeNodeì— pushí•œë‹¤
 
 #ifdef __OBJECT_POOL_DEBUG__
 

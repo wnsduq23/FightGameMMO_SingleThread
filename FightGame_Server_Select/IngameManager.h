@@ -16,7 +16,7 @@ public:
 	IngameManager(const IngameManager&) = delete;
 	IngameManager& operator=(const IngameManager&) = delete;
 public:
-	//½Ì±ÛÅæ °´Ã¼ »ı¼º
+	//ì‹±ê¸€í†¤ ê°ì²´ ë°˜í™˜
 	static IngameManager& GetInstance()
 	{
 		static IngameManager _IngameMgr;
@@ -30,7 +30,7 @@ public:
 	========================*/
 	void GameContentsModule();
 
-// Sector °ü·Ã
+// Sector ê´€ë¦¬
 private:
 	Sector _Sectors[dfSECTOR_CNT_Y][dfSECTOR_CNT_X];
 	int _sectorCnt[dfMOVE_DIR_MAX] =
@@ -47,7 +47,7 @@ public:
 	void SendPacketAroundSector(char* msg, int size, Sector* centerSector, Session* pExpSession = nullptr);
 	inline bool FixedUpdate();
 
-// Player °ü·Ã
+// Player ê´€ë¦¬
 	DWORD _playerID = 0;
 	Player* _Players[dfSESSION_MAX]; // Use Session ID for Index
 public:

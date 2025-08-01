@@ -43,7 +43,7 @@ public:
 		_writePos = 0;
 	}
 
-	inline int Resize(int bufferSize)
+	int Resize(int bufferSize)
 	{
 		if (bufferSize > eBUFFER_MAX)
 		{

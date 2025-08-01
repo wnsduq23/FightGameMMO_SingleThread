@@ -23,7 +23,22 @@ public:
 		_sendRingBuf.ClearBuffer();
 	}
 
-public:
+	// Getter methods
+	DWORD GetID() const { return _ID; }
+	SOCKET GetSocket() const { return _socket; }
+	SOCKADDR_IN GetAddr() const { return _addr; }
+	RingBuffer& GetSendRingBuf() { return _sendRingBuf; }
+	RingBuffer& GetRecvRingBuf() { return _recvRingBuf; }
+	SerializePacket& GetRecvSerialPacket() { return _recvSerialPacket; }
+	SerializePacket& GetSendSerialPacket() { return _sendSerialPacket; }
+	DWORD GetLastRecvTime() const { return _lastRecvTime; }
+
+	// Setter methods
+	void SetSocket(SOCKET socket) { _socket = socket; }
+	void SetAddr(const SOCKADDR_IN& addr) { _addr = addr; }
+	void SetLastRecvTime(DWORD time) { _lastRecvTime = time; }
+
+private:
 	DWORD		_ID;
 	bool		_bAlive;
 	SOCKET		_socket;

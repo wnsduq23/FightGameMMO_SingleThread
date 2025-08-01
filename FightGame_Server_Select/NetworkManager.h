@@ -33,7 +33,7 @@ private:
 	timeval					_time;
 	int						_addrlen;
 public:
-	// º¹»ç ¹× ÇÒ´ç ¹æÁö
+	// ë³µì‚¬ ìƒì„±ì ì‚­ì œ
 	NetworkManager(const NetworkManager&) = delete;
 	NetworkManager& operator=(const NetworkManager&) = delete;
 private:
@@ -48,7 +48,7 @@ public:
 	/*========================
 	*	CLASS FUNCTION
 	========================*/
-	//½Ì±ÛÅæ ÀÎ½ºÅÏ½º Á¢±Ù
+	//ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ ë°˜í™˜
 	static NetworkManager& GetInstance()
 	{
 		static NetworkManager _NetworkMgr;
@@ -71,7 +71,7 @@ private:
 	inline void RecvProc(Session* session);
 	inline void SendProc(Session* session);
 
-// session °ü·Ã
+// session ê´€ë¦¬
 	DWORD _sessionIDs = 0;
 	int _usableCnt = 0;
 	DWORD _usableSessionID[dfSESSION_MAX];

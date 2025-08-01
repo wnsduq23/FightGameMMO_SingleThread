@@ -11,10 +11,10 @@
 
     <Ring Buffer>
 
-    readPos´Â ºñ¾îÀÖ´Â °ø°£À»,
-    writePos´Â ¸¶Áö¸·À¸·Î ³ÖÀº °ø°£À» °¡¸®Å²´Ù
-    µû¶ó¼­ readPos == writePos´Â ¹öÆÛ°¡ ºñ¾îÀÖÀ½À» ÀÇ¹ÌÇÏ°í
-    ¹öÆÛ°¡ Ã¡À» ¶§´Â (readPos + 1)%_bufferSize == writePos °¡ µÈ´Ù.
+    readPosëŠ” ì½ê³ ìˆëŠ” ìœ„ì¹˜ì´ê³ ,
+    writePosëŠ” ì“¸ìˆ˜ìˆëŠ” ìœ„ì¹˜ë¥¼ ë‚˜íƒ€ë‚¸ë‹¤.
+    ì¦‰ readPos == writePosëŠ” ë¹ˆê²ƒê³¼ ê°€ë“ì°¬ê²ƒì„ ì˜ë¯¸í•˜ê³ 
+    ë¹ˆê²ƒì´ ê°€ë“ì°¬ê²ƒ (readPos + 1)%_bufferSize == writePos ì´ë‹¤.
 
 ======================================================================*/
 class RingBuffer
@@ -249,7 +249,7 @@ public:
         ::wprintf(L"\n");
     }
 
-    inline bool Resize(int size)
+    bool Resize(int size)
     {
         LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
             L"%s[%d] Resize\n", _T(__FUNCTION__), __LINE__);
