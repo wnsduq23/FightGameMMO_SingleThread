@@ -2,6 +2,7 @@
 
 #include "Protocol.h"
 #include <vector>
+#include <map>
 
 using namespace std;
 class Player;
@@ -31,7 +32,6 @@ public:
 		_yPosMin = (yIndex - 2) * dfSECTOR_SIZE_Y;
 		_xPosMax = (xIndex - 1) * dfSECTOR_SIZE_X;
 		_yPosMax = (yIndex - 1) * dfSECTOR_SIZE_Y;
-		_players.reserve(dfDEFAULT_PLAYERS_PER_SECTOR); // check
 	}
 
 public:
@@ -41,7 +41,7 @@ public:
 	short _yPosMin;
 	short _xPosMax;
 	short _yPosMax;
-	std::vector<Player*> _players;
+	std::map<DWORD, Player*> _players;
 
 public:
 	Sector* _llNew[dfVERT_SECTOR_NUM];

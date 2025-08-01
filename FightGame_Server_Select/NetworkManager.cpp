@@ -652,15 +652,7 @@ void NetworkManager::DisconnectDeadSessions()
 		IngameManager::GetInstance()._Players[ID] = nullptr;
 
 		// Remove from Sector
-		vector<Player*>::iterator vectorIter = pPlayer->GetSector()->_players.begin();
-		for (; vectorIter < pPlayer->GetSector()->_players.end(); vectorIter++)
-		{
-			if ((*vectorIter) == pPlayer)
-			{
-				pPlayer->GetSector()->_players.erase(vectorIter);
-				break;
-			}
-		}
+		pPlayer->GetSector()->_players.erase(pPlayer->GetID());
 		
 		pPlayer->GetSession()->GetSendSerialPacket().Clear();
 		int deleteRet = SetSCPacket_DELETE_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(), pPlayer->GetID());
@@ -1076,9 +1068,11 @@ void NetworkManager::SendPacketUnicast(char* msg, int size, Session* session)
 	if (session == nullptr)
 	{
 		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-			L"%s[%d] Session is nullptr\n", _T(__FUNCTION__), __LINE__);
+			L"%s[%d]: session is nullptr\n",
+			_T(__FUNCTION__), __LINE__);
 
-		::wprintf(L"%s[%d] Session is nullptr\n", _T(__FUNCTION__), __LINE__);
+		::wprintf(L"%s[%d]: session is nullptr\n",
+			_T(__FUNCTION__), __LINE__);
 
 		g_dump.Crash();
 		return;

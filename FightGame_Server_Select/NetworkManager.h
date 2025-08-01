@@ -42,7 +42,6 @@ private:
 	Session* _rSessions[dfSESSION_MAX];
 	Session* _wSessions[dfSESSION_MAX];
 	stack <Session*> _usableSession;
-	
 
 public:
 	/*========================
@@ -62,7 +61,6 @@ public:
 	inline bool HandleCSPacket_Attack3(Player* pPlayer);
 	inline bool HandleCSPacket_ECHO(Player* pPlayer);
 	inline void SendPacketUnicast(char* msg, int msgSize, Session* pSession);
-
 	inline bool GetCSPacket_ECHO(SerializePacket* pPacket, RingBuffer* recvRBuffer, int& time);
 	inline void SelectModel(int rStarIdx, int rCount, int wStartIdx, int wCount);
 	void NetworkUpdate();

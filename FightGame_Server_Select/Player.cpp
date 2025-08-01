@@ -123,19 +123,18 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 	if (direction == dfMOVE_DIR_LL)
 	{
-		vector<Player*>::iterator iter;
 		Sector* pSector = _pSector;
 
-		iter = pSector->_around[dfMOVE_DIR_INPLACE]->_players.begin();
-		for (; iter < pSector->_around[dfMOVE_DIR_INPLACE]->_players.end(); iter++)
+		for (auto& pair : pSector->_around[dfMOVE_DIR_INPLACE]->_players)
 		{
-			if ((*iter) != this)
+			Player* otherPlayer = pair.second;
+			if (otherPlayer != this)
 			{
-				int dist = _x - (*iter)->_x;
+				int dist = _x - otherPlayer->_x;
 				if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -151,14 +150,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 		if (_x <= pSector->_xPosMin + dfATTACK1_RANGE_X)
 		{
-			iter = pSector->_around[dfMOVE_DIR_LL]->_players.begin();
-			for (; iter < pSector->_around[dfMOVE_DIR_LL]->_players.end(); iter++)
+			for (auto& pair : pSector->_around[dfMOVE_DIR_LL]->_players)
 			{
-				int dist = _x - (*iter)->_x;
+				Player* otherPlayer = pair.second;
+				int dist = _x - otherPlayer->_x;
 				if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -173,14 +172,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 			if (_y <= pSector->_yPosMin + dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_LD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_LD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_LD]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -196,14 +195,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y >= pSector->_yPosMax - dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_LU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_LU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_LU]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -222,14 +221,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 		{
 			if (_y <= pSector->_yPosMin + dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_DD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_DD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_DD]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -244,14 +243,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y >= pSector->_yPosMax - dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_UU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_UU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_UU]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -269,19 +268,18 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 	}
 	else if (direction == dfMOVE_DIR_RR)
 	{
-		vector<Player*>::iterator iter;
 		Sector* pSector = _pSector;
 		
-		iter = pSector->_around[dfMOVE_DIR_INPLACE]->_players.begin();
-		for (; iter < pSector->_around[dfMOVE_DIR_INPLACE]->_players.end(); iter++)
+		for (auto& pair : pSector->_around[dfMOVE_DIR_INPLACE]->_players)
 		{
-			if ((*iter) != this)
+			Player* otherPlayer = pair.second;
+			if (otherPlayer != this)
 			{
-				int dist = (*iter)->_x - _x;
+				int dist = otherPlayer->_x - _x;
 				if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -298,14 +296,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 		if (_x >= pSector->_xPosMax - dfATTACK1_RANGE_X)
 		{
-			iter = pSector->_around[dfMOVE_DIR_RR]->_players.begin();
-			for (; iter < pSector->_around[dfMOVE_DIR_RR]->_players.end(); iter++)
+			for (auto& pair : pSector->_around[dfMOVE_DIR_RR]->_players)
 			{
-				int dist = (*iter)->_x - _x;
+				Player* otherPlayer = pair.second;
+				int dist = otherPlayer->_x - _x;
 				if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -321,14 +319,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 			if (_y >= pSector->_yPosMax - dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_RU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_RU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_RU]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -343,14 +341,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if(_y <= pSector->_yPosMin + dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_RD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_RD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_RD]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -369,14 +367,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 		{
 			if (_y >= pSector->_yPosMax - dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_UU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_UU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_UU]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -391,14 +389,14 @@ void Player::SetPlayerAttack1(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y <= pSector->_yPosMin + dfATTACK1_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_DD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_DD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_DD]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK1_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK1_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK1_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK1_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -424,19 +422,18 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 	if (direction == dfMOVE_DIR_LL)
 	{
-		vector<Player*>::iterator iter;
 		Sector* pSector = _pSector;
 
-		iter = pSector->_around[dfMOVE_DIR_INPLACE]->_players.begin();
-		for (; iter < pSector->_around[dfMOVE_DIR_INPLACE]->_players.end(); iter++)
+		for (auto& pair : pSector->_around[dfMOVE_DIR_INPLACE]->_players)
 		{
-			if ((*iter) != this)
+			Player* otherPlayer = pair.second;
+			if (otherPlayer != this)
 			{
-				int dist = _x - (*iter)->_x;
+				int dist = _x - otherPlayer->_x;
 				if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -453,14 +450,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 		if (_x <= pSector->_xPosMin + dfATTACK2_RANGE_X)
 		{
-			iter = pSector->_around[dfMOVE_DIR_LL]->_players.begin();
-			for (; iter < pSector->_around[dfMOVE_DIR_LL]->_players.end(); iter++)
+			for (auto& pair : pSector->_around[dfMOVE_DIR_LL]->_players)
 			{
-				int dist = _x - (*iter)->_x;
+				Player* otherPlayer = pair.second;
+				int dist = _x - otherPlayer->_x;
 				if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -476,14 +473,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 			if (_y <= pSector->_yPosMin + dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_LD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_LD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_LD]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -498,14 +495,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y >= pSector->_yPosMax - dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_LU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_LU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_LU]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -524,14 +521,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 		{
 			if (_y <= pSector->_yPosMin + dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_DD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_DD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_DD]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -547,14 +544,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y >= pSector->_yPosMax - dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_UU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_UU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_UU]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -572,19 +569,18 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 	}
 	else if (direction == dfMOVE_DIR_RR)
 	{
-		vector<Player*>::iterator iter;
 		Sector* pSector = _pSector;
 
-		iter = pSector->_around[dfMOVE_DIR_INPLACE]->_players.begin();
-		for (; iter < pSector->_around[dfMOVE_DIR_INPLACE]->_players.end(); iter++)
+		for (auto& pair : pSector->_around[dfMOVE_DIR_INPLACE]->_players)
 		{
-			if ((*iter) != this)
+			Player* otherPlayer = pair.second;
+			if (otherPlayer != this)
 			{
-				int dist = (*iter)->_x - _x;
+				int dist = otherPlayer->_x - _x;
 				if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -601,14 +597,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 		if (_x >= pSector->_xPosMax - dfATTACK2_RANGE_X)
 		{
-			iter = pSector->_around[dfMOVE_DIR_RR]->_players.begin();
-			for (; iter < pSector->_around[dfMOVE_DIR_RR]->_players.end(); iter++)
+			for (auto& pair : pSector->_around[dfMOVE_DIR_RR]->_players)
 			{
-				int dist = (*iter)->_x - _x;
+				Player* otherPlayer = pair.second;
+				int dist = otherPlayer->_x - _x;
 				if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -624,14 +620,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 			if (_y >= pSector->_yPosMax - dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_RU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_RU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_RU]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -647,14 +643,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y <= pSector->_yPosMin + dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_RD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_RD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_RD]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -673,14 +669,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 		{
 			if (_y >= pSector->_yPosMax - dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_UU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_UU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_UU]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -696,14 +692,14 @@ void Player::SetPlayerAttack2(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y <= pSector->_yPosMin + dfATTACK2_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_DD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_DD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_DD]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK2_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK2_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK2_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK2_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -728,19 +724,18 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 	if (direction == dfMOVE_DIR_LL)
 	{
-		vector<Player*>::iterator iter;
 		Sector* pSector = _pSector;
 
-		iter = pSector->_around[dfMOVE_DIR_INPLACE]->_players.begin();
-		for (; iter < pSector->_around[dfMOVE_DIR_INPLACE]->_players.end(); iter++)
+		for (auto& pair : pSector->_around[dfMOVE_DIR_INPLACE]->_players)
 		{
-			if ((*iter) != this)
+			Player* otherPlayer = pair.second;
+			if (otherPlayer != this)
 			{
-				int dist = _x - (*iter)->_x;
+				int dist = _x - otherPlayer->_x;
 				if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -757,14 +752,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 		if (_x <= pSector->_xPosMin + dfATTACK3_RANGE_X)
 		{
-			iter = pSector->_around[dfMOVE_DIR_LL]->_players.begin();
-			for (; iter < pSector->_around[dfMOVE_DIR_LL]->_players.end(); iter++)
+			for (auto& pair : pSector->_around[dfMOVE_DIR_LL]->_players)
 			{
-				int dist = _x - (*iter)->_x;
+				Player* otherPlayer = pair.second;
+				int dist = _x - otherPlayer->_x;
 				if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -780,14 +775,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 			if (_y <= pSector->_yPosMin + dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_LD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_LD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_LD]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -803,14 +798,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y >= pSector->_yPosMax - dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_LU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_LU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_LU]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -829,14 +824,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 		{
 			if (_y <= pSector->_yPosMin + dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_DD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_DD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_DD]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -852,14 +847,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y >= pSector->_yPosMax - dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_UU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_UU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_UU]->_players)
 				{
-					int dist = _x - (*iter)->_x;
+					Player* otherPlayer = pair.second;
+					int dist = _x - otherPlayer->_x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -877,19 +872,18 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 	}
 	else if (direction == dfMOVE_DIR_RR)
 	{
-		vector<Player*>::iterator iter;
 		Sector* pSector = _pSector;
 
-		iter = pSector->_around[dfMOVE_DIR_INPLACE]->_players.begin();
-		for (; iter < pSector->_around[dfMOVE_DIR_INPLACE]->_players.end(); iter++)
+		for (auto& pair : pSector->_around[dfMOVE_DIR_INPLACE]->_players)
 		{
-			if ((*iter) != this)
+			Player* otherPlayer = pair.second;
+			if (otherPlayer != this)
 			{
-				int dist = (*iter)->_x - _x;
+				int dist = otherPlayer->_x - _x;
 				if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -905,14 +899,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 		if (_x >= pSector->_xPosMax - dfATTACK3_RANGE_X)
 		{
-			iter = pSector->_around[dfMOVE_DIR_RR]->_players.begin();
-			for (; iter < pSector->_around[dfMOVE_DIR_RR]->_players.end(); iter++)
+			for (auto& pair : pSector->_around[dfMOVE_DIR_RR]->_players)
 			{
-				int dist = (*iter)->_x - _x;
+				Player* otherPlayer = pair.second;
+				int dist = otherPlayer->_x - _x;
 				if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-					abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+					abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 				{
-					pDamagedPlayer = (*iter);
+					pDamagedPlayer = otherPlayer;
 					pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 					if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -928,14 +922,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 
 			if (_y >= pSector->_yPosMax - dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_RU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_RU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_RU]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -951,14 +945,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y <= pSector->_yPosMin + dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_RD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_RD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_RD]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -976,14 +970,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 		{
 			if (_y >= pSector->_yPosMax - dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_UU]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_UU]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_UU]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
@@ -999,14 +993,14 @@ void Player::SetPlayerAttack3(Player*& pDamagedPlayer, BYTE& direction, short& x
 			}
 			else if (_y <= pSector->_yPosMin + dfATTACK3_RANGE_Y)
 			{
-				iter = pSector->_around[dfMOVE_DIR_DD]->_players.begin();
-				for (; iter < pSector->_around[dfMOVE_DIR_DD]->_players.end(); iter++)
+				for (auto& pair : pSector->_around[dfMOVE_DIR_DD]->_players)
 				{
-					int dist = (*iter)->_x - _x;
+					Player* otherPlayer = pair.second;
+					int dist = otherPlayer->_x - _x;
 					if (dist >= 0 && dist <= dfATTACK3_RANGE_X &&
-						abs((*iter)->_y - _y) <= dfATTACK3_RANGE_Y)
+						abs(otherPlayer->_y - _y) <= dfATTACK3_RANGE_Y)
 					{
-						pDamagedPlayer = (*iter);
+						pDamagedPlayer = otherPlayer;
 						pDamagedPlayer->_hp -= dfATTACK3_DAMAGE;
 
 						if (pDamagedPlayer->_hp <= 0 || pDamagedPlayer->_hp > 100)
