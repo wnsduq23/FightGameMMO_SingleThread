@@ -273,14 +273,14 @@ void IngameManager::UpdateSector(Player* pPlayer)
 			pPlayer->GetSession()->GetSendSerialPacket().Clear();
 			int createOtherRet = SetSCPacket_CREATE_OTHER_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(),
 				otherPlayer->GetID(), otherPlayer->GetHeadDirection(), otherPlayer->GetX(), otherPlayer->GetY(), otherPlayer->GetHp());
-			NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createOtherRet, pPlayer->GetSession());
+			NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createOtherRet, pPlayer->GetSession());
 
 			if (otherPlayer->GetStateMoving()) // check
 			{
 				pPlayer->GetSession()->GetSendSerialPacket().Clear();
 				int MoveOtherRet = SetSCPacket_MOVE_START(&pPlayer->GetSession()->GetSendSerialPacket(),
 					otherPlayer->GetID(), otherPlayer->GetMoveDirection(), otherPlayer->GetX(), otherPlayer->GetY());
-				NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), MoveOtherRet, pPlayer->GetSession());
+				NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), MoveOtherRet, pPlayer->GetSession());
 			}
 		}
 	}
@@ -292,7 +292,7 @@ void IngameManager::UpdateSector(Player* pPlayer)
 			Player* otherPlayer = pair.second;
 			pPlayer->GetSession()->GetSendSerialPacket().Clear();
 			int deleteOtherRet = SetSCPacket_DELETE_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(), otherPlayer->GetID());
-			NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), deleteOtherRet, pPlayer->GetSession());
+			NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), deleteOtherRet, pPlayer->GetSession());
 		}
 	}
 
@@ -533,7 +533,7 @@ void IngameManager::CreatePlayer(Session* pSession)
 	pPlayer->GetSession()->GetSendSerialPacket().Clear();
 	int createMeRet = SetSCPacket_CREATE_MY_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(),
 		pPlayer->GetID(), pPlayer->GetHeadDirection(), pPlayer->GetX(), pPlayer->GetY(), pPlayer->GetHp());
-	NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createMeRet, pPlayer->GetSession());
+	NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createMeRet, pPlayer->GetSession());
 
 	// Send <Create New Player Message> to All Player
 	pPlayer->GetSession()->GetSendSerialPacket().Clear();
@@ -552,14 +552,14 @@ void IngameManager::CreatePlayer(Session* pSession)
 			pPlayer->GetSession()->GetSendSerialPacket().Clear();
 			int createOtherRet = SetSCPacket_CREATE_OTHER_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(),
 				otherPlayer->GetID(), otherPlayer->GetHeadDirection(), otherPlayer->GetX(), otherPlayer->GetY(), otherPlayer->GetHp());
-			NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createOtherRet, pPlayer->GetSession());
+			NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createOtherRet, pPlayer->GetSession());
 
 			if(otherPlayer->GetStateMoving())
 			{
 				pPlayer->GetSession()->GetSendSerialPacket().Clear();
 				int moveRet = SetSCPacket_MOVE_START(&pPlayer->GetSession()->GetSendSerialPacket(),
 					otherPlayer->GetID(), otherPlayer->GetMoveDirection(), otherPlayer->GetX(), otherPlayer->GetY());
-				NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), moveRet, pPlayer->GetSession());
+				NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), moveRet, pPlayer->GetSession());
 			}
 		}
 	}
@@ -573,14 +573,14 @@ void IngameManager::CreatePlayer(Session* pSession)
 			pPlayer->GetSession()->GetSendSerialPacket().Clear();
 			int createOtherRet = SetSCPacket_CREATE_OTHER_CHARACTER(&pPlayer->GetSession()->GetSendSerialPacket(),
 				otherPlayer->GetID(), otherPlayer->GetHeadDirection(), otherPlayer->GetX(), otherPlayer->GetY(), otherPlayer->GetHp());
-			NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createOtherRet, pPlayer->GetSession());
+			NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), createOtherRet, pPlayer->GetSession());
 			
 			if (otherPlayer->GetStateMoving())
 			{
 				pPlayer->GetSession()->GetSendSerialPacket().Clear();
 				int moveRet = SetSCPacket_MOVE_START(&pPlayer->GetSession()->GetSendSerialPacket(),
 					otherPlayer->GetID(), otherPlayer->GetMoveDirection(), otherPlayer->GetX(), otherPlayer->GetY());
-				NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), moveRet, pPlayer->GetSession());
+				NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), moveRet, pPlayer->GetSession());
 			}
 		
 		}

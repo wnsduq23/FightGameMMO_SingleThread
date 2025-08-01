@@ -12,16 +12,16 @@
 
 LARGE_INTEGER freq;
 struct _PROFILE_RESULT {
-	long			_flag = 0;						// ÇÁ·ÎÆÄÀÏÀÇ »ç¿ë ¿©ºÎ
-	WCHAR			_name[NAME_LEN] = { '/0', };	// ÇÁ·ÎÆÄÀÏ »ùÇÃ ÀÌ¸§
+	long			_flag = 0;						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	WCHAR			_name[NAME_LEN] = { '/0', };	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½
 
-	LARGE_INTEGER	_startTime;						// ÇÁ·ÎÆÄÀÏ »ùÇÃ ½ÇÇà ½Ã°£
+	LARGE_INTEGER	_startTime;						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 
-	double			_totalTime = 0;					// ÀüÃ¼ »ç¿ë½Ã°£ Ä«¿îÅÍ Time
-	double			_min[MINMAX_CNT] = { DBL_MAX, DBL_MAX };	// ÃÖ¼Ò »ç¿ë½Ã°£ Ä«¿îÅÍ Time
-	double			_max[MINMAX_CNT] = { 0, 0 };	// ÃÖ´ë »ç¿ë½Ã°£ Ä«¿îÅÍ Time
+	double			_totalTime = 0;					// ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½Ã°ï¿½ Ä«ï¿½ï¿½ï¿½ï¿½ Time
+	double			_min[MINMAX_CNT] = { DBL_MAX, DBL_MAX };	// ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½Ã°ï¿½ Ä«ï¿½ï¿½ï¿½ï¿½ Time
+	double			_max[MINMAX_CNT] = { 0, 0 };	// ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½Ã°ï¿½ Ä«ï¿½ï¿½ï¿½ï¿½ Time
 
-	__int64			_call = 0;						// ´©Àû È£Ãâ È½¼ö
+	__int64			_call = 0;						// ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½ È½ï¿½ï¿½
 
 } PROFILE_RESULT[PROFILE_CNT];
 

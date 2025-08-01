@@ -197,6 +197,11 @@ void NetworkManager::NetworkUpdate()
 
     PRO_END(L"Network");
 
+    // 배치 패킷들을 플러시
+    PRO_BEGIN(L"BatchFlush");
+    FlushBatchPackets();
+    PRO_END(L"BatchFlush");
+
 }
 
 void NetworkManager::SelectModel(int rStartIdx, int rCount, int wStartIdx, int wCount)
@@ -752,7 +757,7 @@ bool NetworkManager::HandleCSPacket_MoveStart(Player* pPlayer)
 		pPlayer->GetSession()->GetSendSerialPacket().Clear();
 		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
 			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port),X,Y);
@@ -808,7 +813,7 @@ bool NetworkManager::HandleCSPacket_MoveStop(Player* pPlayer)
 		pPlayer->GetSession()->GetSendSerialPacket().Clear();
 		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
 			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port),X,Y);
@@ -928,7 +933,7 @@ bool NetworkManager::HandleCSPacket_Attack2(Player* pPlayer)
 		pPlayer->GetSession()->GetSendSerialPacket().Clear();
 		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
 			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
@@ -994,7 +999,7 @@ bool NetworkManager::HandleCSPacket_Attack3(Player* pPlayer)
 		pPlayer->GetSession()->GetSendSerialPacket().Clear();
 		int setRet = SetSCPacket_SYNC(&pPlayer->GetSession()->GetSendSerialPacket(),
 			pPlayer->GetID(), pPlayer->GetX(), pPlayer->GetY());
-		NetworkManager::GetInstance().SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
+		NetworkManager::GetInstance().AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 		LOG(L"FightGame", SystemLog::DEBUG_LEVEL,
 			L"%s[%d] SessionID : %d (socket port :%u) (%d, %d) \n",
 			_T(__FUNCTION__), __LINE__, pPlayer->GetSession()->GetID(), ntohs(pPlayer->GetSession()->GetAddr().sin_port), X, Y);
@@ -1057,7 +1062,7 @@ bool NetworkManager::HandleCSPacket_ECHO(Player* pPlayer)
 	
 	pPlayer->GetSession()->GetSendSerialPacket().Clear();
 	int setRet = SetSCPacket_ECHO(&pPlayer->GetSession()->GetSendSerialPacket(), time);
-	SendPacketUnicast(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
+	AddBatchPacket(pPlayer->GetSession()->GetSendSerialPacket().GetReadPtr(), setRet, pPlayer->GetSession());
 	
 	return true;
 }
@@ -1090,4 +1095,110 @@ void NetworkManager::SendPacketUnicast(char* msg, int size, Session* session)
 		g_dump.Crash();
 		return;
 	}
+}
+
+// 패킷 배칭 관련 함수들
+void NetworkManager::AddBatchPacket(char* msg, int size, Session* session)
+{
+	// 유효성 검사
+	if (msg == nullptr || size <= 0 || session == nullptr)
+		return;
+	
+	// 패킷 데이터를 복사하여 배치에 추가
+	char* copiedData = new char[size];
+	memcpy(copiedData, msg, size);
+	
+	_batchPackets.emplace_back(copiedData, size, session);
+	
+	// 배치 크기가 최대치에 도달하면 즉시 플러시
+	if (_batchPackets.size() >= MAX_BATCH_SIZE)
+	{
+		FlushBatchPackets();
+	}
+}
+
+void NetworkManager::FlushBatchPackets()
+{
+	if (_batchPackets.empty())
+		return;
+	
+	// 세션별로 패킷들을 그룹화
+	std::unordered_map<Session*, std::vector<std::pair<char*, int>>> sessionPackets;
+	
+	for (const auto& batchPacket : _batchPackets)
+	{
+		sessionPackets[batchPacket.target].emplace_back(batchPacket.data, batchPacket.size);
+	}
+	
+	// 각 세션별로 배치 처리
+	for (const auto& sessionGroup : sessionPackets)
+	{
+		Session* session = sessionGroup.first;
+		const auto& packets = sessionGroup.second;
+		
+		if (packets.size() == 1)
+		{
+			// 단일 패킷인 경우 기존 방식 사용
+			SendPacketUnicast(packets[0].first, packets[0].second, session);
+		}
+		else
+		{
+			// 여러 패킷인 경우 최적화된 배치 전송
+			OptimizedSendPacketUnicast(packets, session);
+		}
+	}
+	
+	// 메모리 정리 - BatchPacket 소멸자가 자동으로 처리
+	_batchPackets.clear();
+}
+
+void NetworkManager::OptimizedSendPacketUnicast(const std::vector<std::pair<char*, int>>& packets, Session* session)
+{
+	if (session == nullptr || packets.empty())
+		return;
+	
+	// 전체 크기 계산
+	int totalSize = 0;
+	for (const auto& packet : packets)
+	{
+		if (packet.first != nullptr && packet.second > 0)
+		{
+			totalSize += packet.second;
+		}
+	}
+	
+	if (totalSize <= 0)
+		return;
+	
+	// 배치 버퍼 생성
+	char* batchBuffer = new char[totalSize];
+	int offset = 0;
+	
+	// 모든 패킷을 하나의 버퍼로 결합
+	for (const auto& packet : packets)
+	{
+		if (packet.first != nullptr && packet.second > 0)
+		{
+			memcpy(batchBuffer + offset, packet.first, packet.second);
+			offset += packet.second;
+		}
+	}
+	
+	// 배치 버퍼를 세션의 송신 링버퍼에 추가
+	int enqueueRet = session->GetSendRingBuf().Enqueue(batchBuffer, totalSize);
+	if (enqueueRet != totalSize)
+	{
+		LOG(L"FightGame", SystemLog::ERROR_LEVEL,
+			L"%s[%d] Session %d - Batch sendRBuf Enqueue Error (req - %d, ret - %d)\n",
+			_T(__FUNCTION__), __LINE__, session->GetID(), totalSize, enqueueRet);
+
+		::wprintf(L"%s[%d] Session %d - Batch sendRBuf Enqueue Error (req - %d, ret - %d)\n",
+			_T(__FUNCTION__), __LINE__, session->GetID(), totalSize, enqueueRet);
+
+		delete[] batchBuffer;
+		g_dump.Crash();
+		return;
+	}
+	
+	delete[] batchBuffer;
 }

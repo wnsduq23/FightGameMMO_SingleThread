@@ -1,15 +1,16 @@
 ----------------------------------------------
 | Name 		| Average(us) 	| Call/s 	| Total Call | Total(us) |
 ----------------------------------------------
-| Disconnect 	| 0.5874ms 	|  1702524 	|     889134 	| 522244.60ms |
-| Network 	| 212.9931ms 	|     4695 	|     889134 	| 189379413.90ms |
-| Content 	| 2978.7306ms 	|      336 	|       2884 	| 8590659.10ms |
-| Network : Accept 	| 60.6602ms 	|    16485 	|      23033 	| 1397185.80ms |
-| ObjectPool Alloc 	| 0.5159ms 	|  1938364 	|      46066 	| 23765.40ms |
-| Ingame : CreatePlayer 	| 32.5659ms 	|    30707 	|      23033 	| 750091.10ms |
-| Network: Send 	| 12.6247ms 	|    79210 	|   10574126 	| 133494838.60ms |
-| Network: Recv 	| 1.9915ms 	|   502132 	|     245719 	| 489351.80ms |
-| Network : HandlePacket 	| 22.1883ms 	|    45069 	|     231642 	| 5139751.70ms |
-| Content: Update Sector 	| 17.6868ms 	|    56539 	|     332622 	| 5883017.40ms |
+| Disconnect 	| 0.3503ms 	|  2854839 	|     628734 	| 220234.50ms |
+| Network 	| 119.4286ms 	|     8373 	|     628734 	| 75088805.70ms |
+| BatchFlush 	| 0.2714ms 	|  3684940 	|     628734 	| 170622.60ms |
+| Content 	| 1912.1805ms 	|      523 	|       1576 	| 3013596.40ms |
+| Network : Accept 	| 58.0945ms 	|    17213 	|       8508 	| 494268.20ms |
+| ObjectPool Alloc 	| 0.3752ms 	|  2665581 	|      17016 	| 6383.60ms |
+| Ingame : CreatePlayer 	| 33.1690ms 	|    30149 	|       8508 	| 282202.00ms |
+| Network: Send 	| 12.5223ms 	|    79857 	|    2957038 	| 37028983.60ms |
+| Network: Recv 	| 1.9301ms 	|   518114 	|      69820 	| 134758.00ms |
+| Network : HandlePacket 	| 20.3645ms 	|    49105 	|      61903 	| 1260625.60ms |
+| Content: Update Sector 	| 25.6850ms 	|    38933 	|      85925 	| 2206979.70ms |
 ----------------------------------------------
 
