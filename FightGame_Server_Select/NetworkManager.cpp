@@ -251,35 +251,9 @@ void NetworkManager::SelectModel(int rStartIdx, int rCount, int wStartIdx, int w
 #include <string>
 
 
-bool IsDelayablePacket(BYTE type)
-{
-    return (
-        type == dfPACKET_SC_MOVE_START
-    );
-}
 void NetworkManager::SendProc(Session* session)
 {
 	PRO_BEGIN(L"Network: Send");
-
-	static bool delayedMoveStart = true;
-
-	int useSize = session->GetSendRingBuf().GetUseSize();
-	if (useSize < sizeof(stPACKET_HEADER)) return;
-
-	stPACKET_HEADER hdr;
-	session->GetSendRingBuf().Peek((char*)&hdr, sizeof(hdr));
-
-	int packetSize = sizeof(hdr) + hdr.payload_size;
-	if (useSize < packetSize) return;
-
-	if (useSize == packetSize && IsDelayablePacket(hdr.action_type))
-	{
-		if (!delayedMoveStart) 
-		{
-			delayedMoveStart = true;
-			return;
-		}
-	}
 
 	int sendRet = 0;
 	int directDeqSize;
@@ -375,7 +349,6 @@ void NetworkManager::SendProc(Session* session)
 		return;
 	}
 
-	delayedMoveStart = false;
 }
 
 void NetworkManager::AcceptProc()

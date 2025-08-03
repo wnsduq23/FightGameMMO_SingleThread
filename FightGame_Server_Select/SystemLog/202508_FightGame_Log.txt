@@ -11945,3 +11945,9 @@
 [FightGame][2025-08-01 23:07:29/level:0/count:00000001] NetworkManager::RecvProc[528]: recv returns 0
 [FightGame][2025-08-03 11:32:26/level:2/count:00000000] Main Thread Start
 [FightGame][2025-08-03 11:33:05/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-03 14:44:28/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-03 14:44:41/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-03 14:44:45/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-03 14:45:35/level:0/count:00000001] RingBuffer::Resize[255] Resize
+[FightGame][2025-08-03 14:47:30/level:0/count:00000002] RingBuffer::Resize[255] Resize
+[FightGame][2025-08-03 14:48:21/level:2/count:00000000] Main Thread Start
