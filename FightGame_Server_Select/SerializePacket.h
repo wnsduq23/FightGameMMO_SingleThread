@@ -8,6 +8,7 @@
 
 #include <tchar.h>
 #include <stdio.h>
+#include <type_traits>
 #include "SystemLog.h"
 
 class SerializePacket
@@ -94,343 +95,43 @@ public:
 		return *this;
 	}
 
-	inline SerializePacket& operator << (float fValue)
+	// 템플릿을 사용한 operator << (쓰기)
+	template<typename T>
+	inline SerializePacket& operator << (T value)
 	{
-		if (_bufferSize - _writePos < sizeof(fValue))
+		
+		if (_bufferSize - _writePos < sizeof(T))
 			Resize((int)(_bufferSize * 1.5f));
 
 		memcpy_s(&_buffer[_writePos],
 			_bufferSize - _writePos,
-			&fValue, sizeof(fValue));
+			&value, sizeof(T));
 
-		_writePos += sizeof(fValue);
+		_writePos += sizeof(T);
 		return *this;
 	}
 
-	inline SerializePacket& operator << (double dValue)
+	// 템플릿을 사용한 operator >> (읽기)
+	template<typename T>
+	inline SerializePacket& operator >> (T& value)
 	{
-		if (_bufferSize - _writePos < sizeof(dValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&dValue, sizeof(dValue));
-
-		_writePos += sizeof(dValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (float& fValue)
-	{
-		if (_writePos - _readPos < sizeof(float))
+		
+		if (_writePos - _readPos < sizeof(T))
 		{
 			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
 				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(float));
+				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(T));
 
 			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(float));
+				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(T));
 
 			return *this;
 		}
 
-		memcpy_s(&fValue, sizeof(float),
-			&_buffer[_readPos], sizeof(float));
+		memcpy_s(&value, sizeof(T),
+			&_buffer[_readPos], sizeof(T));
 
-		_readPos += sizeof(float);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (double& dValue)
-	{
-		if (_writePos - _readPos < sizeof(double))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(double));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(double));
-
-			return *this;
-		}
-
-		memcpy_s(&dValue, sizeof(double),
-			&_buffer[_readPos], sizeof(double));
-
-		_readPos += sizeof(double);
-		return *this;
-	}
-
-	inline SerializePacket& operator << (char chValue)
-	{
-		if (_bufferSize - _writePos < sizeof(chValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&chValue, sizeof(chValue));
-
-		_writePos += sizeof(chValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator << (unsigned char chValue)
-	{
-		if (_bufferSize - _writePos < sizeof(chValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&chValue, sizeof(chValue));
-
-		_writePos += sizeof(chValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator << (short shValue)
-	{
-		if (_bufferSize - _writePos < sizeof(shValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&shValue, sizeof(shValue));
-
-		_writePos += sizeof(shValue);
-		return *this;
-	}
-	inline SerializePacket& operator << (unsigned short wValue)
-	{
-		if (_bufferSize - _writePos < sizeof(wValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&wValue, sizeof(wValue));
-
-		_writePos += sizeof(wValue);
-		return *this;
-	}
-
-
-	inline SerializePacket& operator << (int iValue)
-	{
-		if (_bufferSize - _writePos < sizeof(iValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&iValue, sizeof(iValue));
-
-		_writePos += sizeof(iValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator << (long lValue)
-	{
-		if (_bufferSize - _writePos < sizeof(lValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&lValue, sizeof(lValue));
-
-		_writePos += sizeof(lValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator << (__int64 iValue)
-	{
-		if (_bufferSize - _writePos < sizeof(iValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&iValue, sizeof(iValue));
-
-		_writePos += sizeof(iValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator << (DWORD iValue)
-	{
-		if (_bufferSize - _writePos < sizeof(iValue))
-			Resize((int)(_bufferSize * 1.5f));
-
-		memcpy_s(&_buffer[_writePos],
-			_bufferSize - _writePos,
-			&iValue, sizeof(iValue));
-
-		_writePos += sizeof(iValue);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (char& chValue)
-	{
-		if (_writePos - _readPos < sizeof(char))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(char));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(char));
-
-			return *this;
-		}
-
-		memcpy_s(&chValue, sizeof(char),
-			&_buffer[_readPos], sizeof(char));
-
-		_readPos += sizeof(char);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (BYTE& byValue)
-	{
-		if (_writePos - _readPos < sizeof(BYTE))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(BYTE));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(BYTE));
-
-			return *this;
-		}
-
-		memcpy_s(&byValue, sizeof(BYTE),
-			&_buffer[_readPos], sizeof(BYTE));
-
-		_readPos += sizeof(BYTE);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (wchar_t& szValue)
-	{
-		if (_writePos - _readPos < sizeof(wchar_t))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(wchar_t));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(wchar_t));
-
-			return *this;
-		}
-
-		memcpy_s(&szValue, sizeof(wchar_t),
-			&_buffer[_readPos], sizeof(wchar_t));
-
-		_readPos += sizeof(wchar_t);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (short& shValue)
-	{
-		if (_writePos - _readPos < sizeof(short))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(short));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(short));
-
-			return *this;
-		}
-
-		memcpy_s(&shValue, sizeof(short),
-			&_buffer[_readPos], sizeof(short));
-
-		_readPos += sizeof(short);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (WORD& wValue)
-	{
-		if (_writePos - _readPos < sizeof(WORD))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(WORD));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(WORD));
-
-			return *this;
-		}
-
-		memcpy_s(&wValue, sizeof(WORD),
-			&_buffer[_readPos], sizeof(WORD));
-
-		_readPos += sizeof(WORD);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (int& iValue)
-	{
-		if (_writePos - _readPos < sizeof(int))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(int));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(int));
-
-			return *this;
-		}
-
-		memcpy_s(&iValue, sizeof(int),
-			&_buffer[_readPos], sizeof(int));
-
-		_readPos += sizeof(int);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (DWORD& dwValue)
-	{
-		if (_writePos - _readPos < sizeof(DWORD))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(DWORD));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(DWORD));
-
-			return *this;
-		}
-
-		memcpy_s(&dwValue, sizeof(DWORD),
-			&_buffer[_readPos], sizeof(DWORD));
-
-		_readPos += sizeof(DWORD);
-		return *this;
-	}
-
-	inline SerializePacket& operator >> (__int64& iValue)
-	{
-		if (_writePos - _readPos < sizeof(__int64))
-		{
-			LOG(L"FightGame", SystemLog::ERROR_LEVEL,
-				L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(__int64));
-
-			::wprintf(L"%s[%d]: used size %d < req size: %llu\n",
-				_T(__FUNCTION__), __LINE__, _writePos - _readPos, sizeof(__int64));
-
-			return *this;
-		}
-
-		memcpy_s(&iValue, sizeof(__int64),
-			&_buffer[_readPos], sizeof(__int64));
-
-		_readPos += sizeof(__int64);
+		_readPos += sizeof(T);
 		return *this;
 	}
 
