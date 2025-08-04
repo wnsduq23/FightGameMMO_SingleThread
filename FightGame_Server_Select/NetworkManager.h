@@ -44,41 +44,7 @@ private:
 	Session* _wSessions[dfSESSION_MAX];
 	stack <Session*> _usableSession;
 
-	// 패킷 배칭을 위한 구조체
-	struct BatchPacket {
-		char* data;
-		int size;
-		Session* target;
-		
-		BatchPacket(char* d, int s, Session* t) : data(d), size(s), target(t) {}
-		~BatchPacket() {
-			if (data != nullptr) {
-				delete[] data;
-				data = nullptr;
-			}
-		}
-		// 복사 생성자와 대입 연산자 삭제 (RAII 위반 방지)
-		BatchPacket(const BatchPacket&) = delete;
-		BatchPacket& operator=(const BatchPacket&) = delete;
-		// 이동 생성자와 이동 대입 연산자 허용
-		BatchPacket(BatchPacket&& other) noexcept : data(other.data), size(other.size), target(other.target) {
-			other.data = nullptr;
-		}
-		BatchPacket& operator=(BatchPacket&& other) noexcept {
-			if (this != &other) {
-				if (data != nullptr) delete[] data;
-				data = other.data;
-				size = other.size;
-				target = other.target;
-				other.data = nullptr;
-			}
-			return *this;
-		}
-	};
-	
-	// 배칭 관련 멤버 변수
-	std::vector<BatchPacket> _batchPackets;
-	static const int MAX_BATCH_SIZE = 1000; // 배치 크기 제한
+
 	
 
 public:
@@ -102,10 +68,6 @@ public:
 	inline bool GetCSPacket_ECHO(SerializePacket* pPacket, RingBuffer* recvRBuffer, int& time);
 	inline void SelectModel(int rStarIdx, int rCount, int wStartIdx, int wCount);
 	void NetworkUpdate();
-	// 배칭 관련 함수들
-	void AddBatchPacket(char* msg, int size, Session* session);
-	void FlushBatchPackets();
-	void OptimizedSendPacketUnicast(const std::vector<std::pair<char*, int>>& packets, Session* session);
 private:
 	inline void AcceptProc();
 	inline void RecvProc(Session* session);

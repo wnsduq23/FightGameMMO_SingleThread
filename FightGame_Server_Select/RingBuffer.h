@@ -219,6 +219,21 @@ public:
     inline char* GetReadPtr(void) { return &_buffer[(_readPos + 1) % _bufferSize]; }
     inline char* GetWritePtr(void) { return &_buffer[(_writePos + 1) % _bufferSize]; }
 
+    // Batch send를 위한 메서드들
+    inline int GetBatchSendSize(void) { return _useSize; }
+    
+    inline char* GetBatchSendPtr(void) { return &_buffer[(_readPos + 1) % _bufferSize]; }
+    
+    inline int GetBatchSendSecondSize(void) 
+    { 
+        if (_writePos >= _readPos)
+            return 0; // 두 번째 청크가 필요없음
+        else
+            return _writePos; // 두 번째 청크 크기 (0부터 _writePos까지)
+    }
+    
+    inline char* GetBatchSendSecondPtr(void) { return _buffer; }
+
     inline int DirectEnqueueSize(void)
     {
         if (_writePos >= _readPos)

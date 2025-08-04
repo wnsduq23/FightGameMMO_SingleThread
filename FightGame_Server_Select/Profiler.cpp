@@ -142,7 +142,7 @@ void ProfilePrintResult()
 {
 	::wprintf(
 		L"----------------------------------------------\n"
-		"| Name | Average(us) | Call/s | Total call | Total(us) |\n"
+		"| Name | Average(ms) | Call/s | Total call | Total(ms) |\n"
 		"----------------------------------------------\n");
 
 	int idx = 0;
@@ -166,7 +166,7 @@ void ProfileSaveResult(const WCHAR* filename)
 {
 	char data[OUTPUT_SIZE] =
 		"----------------------------------------------\n"
-		"| Name \t\t| Average(us) \t| Call/s \t| Total Call | Total(us) |\n"
+		"| Name \t\t| Average(ms) \t| Call/s \t| Total Call | Total(ms) |\n"
 		"----------------------------------------------\n";
 
 	int idx = 0;
