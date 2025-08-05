@@ -1,0 +1,5 @@
+[FightGame][2025-08-05 12:25:15/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-05 12:25:39/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-05 12:29:22/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-05 12:34:38/level:2/count:00000000] Main Thread Start
+[FightGame][2025-08-05 12:34:43/level:2/count:00000000] Main Thread Start
