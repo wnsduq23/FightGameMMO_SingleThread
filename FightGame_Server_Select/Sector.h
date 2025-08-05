@@ -33,8 +33,6 @@ public:
 		_xPosMax = (xIndex - 1) * dfSECTOR_SIZE_X;
 		_yPosMax = (yIndex - 1) * dfSECTOR_SIZE_Y;
 		
-		// 성능 최적화: 예상 크기로 reserve
-		_players.reserve(dfDEFAULT_PLAYERS_PER_SECTOR);
 	}
 
 public:
